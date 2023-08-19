@@ -13,6 +13,13 @@ import React from "react";
 import Container from "./container";
 
 const Translate = () => {
+    const [translateMode, setTranslateMode] = React.useState(1);
+    const [textInputArea, setTextInputArea] = React.useState("");
+
+    
+
+
+
     return (
         <>
             <Container className="flex flex-wrap mb-20 lg:gap-10 lg:flex-nowrap h-5/6 ">
