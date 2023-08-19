@@ -1,0 +1,97 @@
+openapi: 3.0.0
+
+info:
+  title: Translation API
+  version: 1.0.0
+
+paths:
+
+  /translate: 
+    post:
+      summary: Translate text
+      parameters:
+        - in: query 
+          name: source_text
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: source_lang
+          schema:
+            type: string  
+          required: true
+        - in: query
+          name: target_lang
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: mode
+          schema:
+            type: string
+            enum: [sync, async] 
+            default: async
+      responses:
+        200:
+          description: Translation result (sync mode)
+        202:  
+          description: Accepted translation job ID (async mode)
+        400:
+          description: Bad request
+         
+       
+  /translate/status:
+    get:
+      summary: Get translation status
+      parameters:
+        - in: query
+          name: job_id
+          schema:
+            type: string
+          required: true
+      responses:  
+        200:
+          description: Translation status and result
+        404:
+          description: Job ID not found
+
+
+  /version:
+    get:
+      summary: Get API version information
+      responses:
+        200:
+          description: API version details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_version:
+                    type: string
+                    description: Version number of the API  
+                  model_info:
+                    type: string
+                    description: Information about the active model(s).
+                  release_notes:
+                    type: string
+                    description: Release notes for this version of the API
+
+  /feedback:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source_text:
+                  type: string
+                  description: Original source text
+                translated_text:
+                  type: string
+                  description: Translated output text
+                rating:
+                  type: integer
+                comments:
+                  type: string
