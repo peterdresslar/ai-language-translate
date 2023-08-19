@@ -1,29 +1,20 @@
 import Head from "next/head";
-import Hero from "../components/hero";
-import Navbar from "../components/navbar";
 import SectionTitle from "../components/sectionTitle";
 
-import { benefitOne, benefitTwo } from "../components/data";
-import Video from "../components/video";
-import Benefits from "../components/benefits";
 import Translate from "../components/translate";
 import Footer from "../components/footer";
 import Message from "../components/message";
-import Testimonials from "../components/testimonials";
-import Cta from "../components/cta";
-import Faq from "../components/faq";
-import PopupWidget from "../components/popupWidget";
 
 const Home = () => {
   return (
     <>
       <Head>
-        <title>Nextly - Free Nextjs & TailwindCSS Landing Page Template</title>
+        <title>Beta AI-powered translator for Samoan and English.</title>
         <meta
           name="description"
           content="Beta AI-powered translator for Samoan and English."
         />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/img/PBDE.png" />
       </Head>
 
       <SectionTitle

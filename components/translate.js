@@ -48,7 +48,7 @@ const Translate = () => {
                     </div>
                     {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
                     <div className="text-input-container">
-                        <textarea id="textInputArea" class="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."></textarea>
+                        <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."></textarea>
                     </div>
                 </div>
                 {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
