@@ -8,3 +8,35 @@
     @apply dark:bg-trueGray-900;
   }
 }
+
+.message {
+  @apply pt-0
+}
+
+.translate-pane-left {
+  @apply w-full lg:w-1/2 h-full
+}
+
+.translate-pane-right {
+  @apply w-full lg:w-1/2 h-full
+}
+
+.control-strip {
+  @apply w-full p-4 border border-gray-200 bg-gray-50 rounded-t-xl dark:border-gray-600 dark:bg-gray-700
+}
+
+.text-input-container {
+  @apply block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-2
+}
+
+.results-container {
+  @apply w-full p-2.5 border-gray-200 border-y border-x dark:border-gray-600 max-h-96 overflow-y-auto mb-2
+}
+
+.text-input-area {
+  @apply w-full h-96 p-2.5  
+}
+
+.results-area {
+  @apply w-full h-96 p-2.5
+}
