@@ -1,7 +1,16 @@
-module.exports = {
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: true,
   },
-  output: "standalone",
+  webpack(config) {
+    config.experiments = {
+      asyncWebAssembly: true,
+      layers: true,
+    };
+
+    return config;
+  },
 };
+
+module.exports = nextConfig;
