@@ -106,17 +106,17 @@ export default function Translate() {
                         <div className="grid grid-cols-3">
                             {/* // Here is the button to copy the results pane to the clipboard. */}
                             <div className="col-span-2 ">
-                                <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded">Copy to Clipboard</button>
+                                <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Copy to Clipboard</button>
                             </div>
                             {/* // Here is the thumbs up button. */}
                             <div className="flex justify-end col-span-1 gap-1">
 
                                 <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded">Good</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Good</button>
                                 </div>
                                 {/* // Here is the thumbs down button. */}
                                 <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded">Bad</button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Bad</button>
                                 </div>
                             </div>
                         </div>
