@@ -34,7 +34,8 @@ export async function POST(req: Request) {
       const writer = stream.writable.getWriter();
       console.log('creating llm');
       const llm = new ChatOpenAI({
-        streaming,
+        streaming: true,
+        // modelName: "gpt-3.5-turbo",
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token: string) => {
             await writer.ready;
