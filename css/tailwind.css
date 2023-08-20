@@ -30,13 +30,13 @@
 }
 
 .results-container {
-  @apply w-full p-2.5 border-gray-200 border-y border-x dark:border-gray-600 max-h-96 overflow-y-auto mb-2
+  @apply w-full p-2.5 border-gray-200 border-y border-x dark:border-gray-600 max-h-96 overflow-y-auto overflow-x-hidden mb-2
 }
 
 .text-input-area {
-  @apply w-full h-96 p-2.5  
+  @apply w-full h-96 p-2.5 overflow-y-auto overflow-x-hidden
 }
 
-.results-area {
-  @apply w-full h-96 p-2.5
+.results-text-area {
+  @apply w-full p-2.5 whitespace-pre-wrap
 }
