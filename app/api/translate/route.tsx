@@ -9,14 +9,20 @@ import {
   HumanMessagePromptTemplate,
 } from 'langchain/prompts';
 
-const prompt = ChatPromptTemplate.fromPromptMessages([
-  HumanMessagePromptTemplate.fromTemplate('{input}'),
-]);
-
 export async function POST(req: Request) {
   try {
-    const { input } = await req.json();
+    const { translateMode, input } = await req.json();
+    console.log('translateMode', translateMode);
     console.log('input', input);
+    // If translateMode is toSamoan, then we need to form an inputRequest that includes asking nicely for the translation to Samoan. The converse is true if translateMode is toEnglish.
+    // Using ternary operator to do this.
+    const request = (translateMode === "toSamoan") ?
+      'Please Translate to Samoan: ' + input :
+      'Please Translate to English: ' + input;
+    console.log('request', request);
+    const prompt = ChatPromptTemplate.fromPromptMessages([
+      HumanMessagePromptTemplate.fromTemplate('{request}'),
+    ]);
     // Check if the request is for a streaming response.
     const streaming = req.headers.get('accept') === 'text/event-stream';
     console.log('server streaming', streaming);
@@ -48,7 +54,7 @@ export async function POST(req: Request) {
       const chain = new LLMChain({ prompt, llm });
       // We don't need to await the result of the chain.run() call because
       // the LLM will invoke the callbackManager's handleLLMEnd() method
-      chain.call({ input }).catch((e: Error) => console.error(e));
+      chain.call({ request }).catch((e: Error) => console.error(e));
       console.log('returning response');
       return new Response(stream.readable, {
         headers: { 'Content-Type': 'text/event-stream' },

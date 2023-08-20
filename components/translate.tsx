@@ -16,7 +16,7 @@ import { FormEvent, useCallback, useState } from 'react';
 export const runtime = 'edge';
 
 export default function Translate() {
-    const [translateMode, setTranslateMode] = useState(1);
+    const [translateMode, setTranslateMode] = useState("toSamoan");
     const [input, setInput] = useState("");
     
     const [inflight, setInflight] = useState(false);
@@ -36,9 +36,10 @@ export default function Translate() {
 
             try {
                 console.log('streaming');
+                //determine which translateMode we are in by reading the radio button value
                 await fetchEventSource('/api/translate', {
                     method: 'POST',
-                    body: JSON.stringify({ input: input }),
+                    body: JSON.stringify({ translateMode: translateMode, input: input }),
                     headers: { 'Content-Type': 'application/json' },
                     onmessage(ev) {
                         setResults((r) => r + ev.data);
@@ -66,11 +67,13 @@ export default function Translate() {
                             <div className="col-span-2 ">
                                 <div className="control-strip-item">
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="1" />
+                                        <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan" 
+                                            onChange={(e) => setTranslateMode(e.target.value)}/>
                                         <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
                                     </div>
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" id="translate-mode-2" name="translate-mode" value="2"  />
+                                        <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish" 
+                                                                                    onChange={(e) => setTranslateMode(e.target.value)}/>
                                         <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
                                     </div>
                                 </div>
