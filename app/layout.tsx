@@ -1,5 +1,6 @@
 "use client"
 import { AppProps } from "next/app";
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from "next-themes";
 import "../css/tailwind.css";
 
@@ -11,7 +12,10 @@ export default function RootLayout({
     return (
         <html lang="en">
             <ThemeProvider attribute="class">
-                <body>{children}</body>
+                <body>
+                    {children}
+                    <Analytics />
+                </body>
             </ThemeProvider>
         </html>
     );

@@ -31,6 +31,7 @@
     "@types/node": "20.0.0",
     "@types/react": "18.2.5",
     "@types/react-dom": "18.2.4",
+    "@vercel/analytics": "^1.0.2",
     "langchain": "^0.0.131",
     "next": "^13.4.1",
     "next-themes": "^0.2.1",
