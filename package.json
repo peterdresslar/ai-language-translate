@@ -1,50 +1,36 @@
 {
-  "name": "nextly-template",
+  "name": "nextjs-langchain-supabase-translate",
   "version": "0.1.0",
-  "description": "Nextly Landing Page Template",
-  "private": true,
+  "description": "nextjs-langchain-supabase-translate",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://gituhb.com/web3templates/nextly-template"
-  },
-  "keywords": [
-    "nextjs",
-    "tailwindcss",
-    "free"
-  ],
-  "author": "Surjith S M",
-  "license": "ISC",
   "dependencies": {
-    "@emotion/css": "^11.10.6",
-    "@emotion/react": "^11.10.6",
-    "@emotion/server": "^11.10.0",
-    "@emotion/styled": "^11.10.6",
-    "@headlessui/react": "^1.7.14",
-    "@heroicons/react": "^2.0.17",
+    "@emotion/css": "^11.11.2",
+    "@emotion/react": "^11.11.1",
+    "@emotion/server": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "20.0.0",
     "@types/react": "18.2.5",
     "@types/react-dom": "18.2.4",
     "@vercel/analytics": "^1.0.2",
-    "langchain": "^0.0.131",
-    "next": "^13.4.1",
-    "next-themes": "^0.2.1",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-hook-form": "^7.43.9"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.14",
+    "autoprefixer": "10.4.14",
+    "eslint": "8.39.0",
     "eslint-config-next": "13.4.1",
-    "eslint-config-prettier": "^8.8.0",
-    "postcss": "^8.4.23",
-    "tailwindcss": "^3.3.1",
-    "typescript": "5.1.6"
+    "langchain": "^0.0.131",
+    "next": "^13.4.19",
+    "next-themes": "^0.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.45.4",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.1.6"
   }
 }
