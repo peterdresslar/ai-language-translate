@@ -18,9 +18,34 @@ export const runtime = 'edge';
 export default function Translate() {
     const [translateMode, setTranslateMode] = useState("toSamoan");
     const [input, setInput] = useState("");
-    
+    const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
+
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
+
+    const handleInputChange = (value: string) => {
+        setInput(value);
+        //enable btnSubmit if input is not empty
+        if (value.length > 0) {
+            document.getElementById("btnSubmit")!.removeAttribute("disabled");
+        } else {
+            document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+        }
+        //check if the btnSubmit is enabled
+    };
+
+    const handleClear = () => {
+        setInput("");
+        setResults("");
+        document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+        setClipboardBtnText("Copy to Clipboard");
+    };
+
+    const handleClippy = (value: string) => {
+        navigator.clipboard.writeText(value);
+        //write a clipboard icon to the clipboard button text
+        setClipboardBtnText("Copied. ☑️");
+    };
 
     const submitHandler = useCallback(
         async (e: FormEvent) => {
@@ -57,36 +82,36 @@ export default function Translate() {
     );
 
     return (
-            <Container className="flex flex-wrap mb-20 lg:gap-10 lg:flex-nowrap h-5/6 ">
-                {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
-                <div className="translate-pane-left">
-                    {/* Here is the control strip */}
-                    <form onSubmit={submitHandler}>
+        <Container className="flex flex-wrap mb-20 lg:gap-10 lg:flex-nowrap h-5/6 ">
+            {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
+            <div className="translate-pane-left">
+                {/* Here is the control strip */}
+                <form onSubmit={submitHandler}>
                     <div className="control-strip">
                         {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
                         <div className="grid grid-cols-3">
                             <div className="col-span-2 ">
-                                <div className="control-strip-item">
+                                <div>
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan" 
-                                            onChange={(e) => setTranslateMode(e.target.value)}/>
+                                        <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan"
+                                            onChange={(e) => setTranslateMode(e.target.value)} />
                                         <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
                                     </div>
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish" 
-                                                                                    onChange={(e) => setTranslateMode(e.target.value)}/>
+                                        <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish"
+                                            onChange={(e) => setTranslateMode(e.target.value)} />
                                         <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
                                     </div>
                                 </div>
                             </div>
                             {/* // Here is the button to clear the text area. */}
                             <div className="flex justify-end col-span-1 gap-1">
-                                <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" type="reset">Clear</button>
+                                <div>
+                                    <button className="control-strip-item" id="btnClear" type="reset" onClick={handleClear}>Clear</button>
                                 </div>
                                 {/* // Here is the button to submit the text area. */}
-                                <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" type="submit">Submit</button>
+                                <div>
+                                    <button className="control-strip-item font-bold" id="btnSubmit" type="submit" disabled>Submit</button>
                                 </div>
                             </div>
                         </div>
@@ -94,40 +119,52 @@ export default function Translate() {
                     {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
                     <div className="text-input-container">
                         <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."
-                            onChange={(e) => setInput(e.target.value)}>
+                            onChange={(e) => handleInputChange(e.target.value)}>
                         </textarea>
                     </div>
-                    </form>
-                </div>
+                </form>
+            </div>
 
-                {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
-                <div className="translate-pane-right">
-                    {/* // Here is the control strip */}
-                    <div className="control-strip">
-                        <div className="grid grid-cols-3">
-                            {/* // Here is the button to copy the results pane to the clipboard. */}
-                            <div className="col-span-2 ">
-                                <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Copy to Clipboard</button>
+            {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
+            <div className="translate-pane-right">
+                {/* // Here is the control strip */}
+                <div className="control-strip">
+                    <div className="grid grid-cols-3">
+                        {/* // Here is the button to copy the results pane to the clipboard. */}
+                        <div className="col-span-2 ">
+                            <button className="control-strip-item" id="btnCopy" 
+                                onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
+                        </div>
+                        {/* // Here is the thumbs up button. */}
+                        <div className="flex justify-end col-span-1 gap-1">
+                            <div>
+                                <button className="control-strip-item" 
+                                disabled
+                                data-te-toggle="tooltip"
+                                data-te-placement="top"
+                                data-te-ripple-init
+                                data-te-ripple-color="light"
+                                title="User feedback coming soon!">Good</button>
                             </div>
-                            {/* // Here is the thumbs up button. */}
-                            <div className="flex justify-end col-span-1 gap-1">
-
-                                <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Good</button>
-                                </div>
-                                {/* // Here is the thumbs down button. */}
-                                <div className="control-strip-item">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font py-2 px-4 rounded" disabled>Bad</button>
-                                </div>
+                            {/* // Here is the thumbs down button. */}
+                            <div>
+                                <button className="control-strip-item" 
+                                disabled
+                                data-te-toggle="tooltip"
+                                data-te-placement="top"
+                                data-te-ripple-init
+                                data-te-ripple-color="light"
+                                title="User feedback coming soon!">Bad</button>
                             </div>
                         </div>
                     </div>
-                    {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
-                    <div className="results-container">
-                        <pre id="resultsTextArea" className="results-text-area">{results}</pre>
-                    </div>
                 </div>
-            </Container>
+                {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
+                <div className="results-container">
+                    <pre id="resultsTextArea" className="results-text-area">{results}</pre>
+                </div>
+            </div>
+        </Container>
     );
 }
 

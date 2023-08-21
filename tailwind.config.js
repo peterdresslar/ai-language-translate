@@ -17,7 +17,11 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      backgroundColor: ["disabled", "hover"],
+      opacity: ["disabled", "hover"],
+      textColor: ["disabled", "hover"],
+    },
   },
   plugins: [require("@tailwindcss/aspect-ratio")],
 };
