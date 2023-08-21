@@ -45,10 +45,8 @@ export default function Translate() {
                         setResults((r) => r + ev.data);
                     },
                 });
-                setInput("");
             } catch (error) {
                 console.error(error);
-                setInput("");
                 setInflight(false);
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
