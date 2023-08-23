@@ -13,13 +13,6 @@ The project's API is using code from the [nextjs-langchain-example](https://gith
 
 The UI is based on the [Nextly Landing Page Template](https://github.com/surjithctly/nextly-template.git), which we are beginning to convert to Typescript for the project. 
 
-# Nextly - Landing Page Template with Next.js & Tailwind CSS
-
-Nextly is a free landing page & marketing website template for  startups and indie projects. Its built with Next.js & TailwindCSS.
-And its completely open-source.
- 
-![image](https://user-images.githubusercontent.com/1884712/121497169-03228680-c990-11eb-975a-e77fddc43de0.png)
-
 ## How to use
 
 To use, simply clone and install, and then hit `dev` with your favorite package manager.
