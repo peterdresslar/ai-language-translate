@@ -7,6 +7,7 @@ import { CallbackManager } from 'langchain/callbacks';
 import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 
 export async function POST(req: Request) {
@@ -14,14 +15,13 @@ export async function POST(req: Request) {
     const { translateMode, input } = await req.json();
     console.log('translateMode', translateMode);
     console.log('input', input);
-    // If translateMode is toSamoan, then we need to form an inputRequest that includes asking nicely for the translation to Samoan. The converse is true if translateMode is toEnglish.
-    // Using ternary operator to do this.
-    const request = (translateMode === "toSamoan") ?
-      'Please Translate to Samoan: ' + input :
-      'Please Translate to English: ' + input;
-    console.log('request', request);
+    const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
+    const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
     const prompt = ChatPromptTemplate.fromPromptMessages([
-      HumanMessagePromptTemplate.fromTemplate('{request}'),
+      SystemMessagePromptTemplate.fromTemplate(
+        "You are a helpful assistant that translates '{input_language}' to '{output_language}'."
+      ),
+      HumanMessagePromptTemplate.fromTemplate('{text}'),
     ]);
     // Check if the request is for a streaming response.
     const streaming = req.headers.get('accept') === 'text/event-stream';
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
       console.log('creating llm');
       const llm = new ChatOpenAI({
         streaming: true,
+        temperature: 0,
         // modelName: "gpt-3.5-turbo",
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token: string) => {
@@ -55,7 +56,11 @@ export async function POST(req: Request) {
       const chain = new LLMChain({ prompt, llm });
       // We don't need to await the result of the chain.run() call because
       // the LLM will invoke the callbackManager's handleLLMEnd() method
-      chain.call({ request }).catch((e: Error) => console.error(e));
+      chain.call({
+        input_language: inputLang,
+        output_language: outputLang,
+        text: input
+      }).catch((e: Error) => console.error(e));
       console.log('returning response');
       return new Response(stream.readable, {
         headers: { 'Content-Type': 'text/event-stream' },
@@ -63,9 +68,13 @@ export async function POST(req: Request) {
     } else {
       // For a non-streaming response we can just await the result of the
       // chain.run() call and return it.
-      const llm = new ChatOpenAI();
+      const llm = new ChatOpenAI({ temperature: 0 });
       const chain = new LLMChain({ prompt, llm });
-      const response = await chain.call({ input });
+      const response = await chain.call({
+        input_language: inputLang,
+        output_language: outputLang,
+        text: input
+      });
 
       return new Response(JSON.stringify(response), {
         headers: { 'Content-Type': 'application/json' },
