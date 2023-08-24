@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       const llm = new ChatOpenAI({
         streaming: true,
         temperature: 0,
-        modelName: "gpt-3.5-turbo-16k-0613",
+        modelName: "gpt-3.5-turbo",
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token: string) => {
             await writer.ready;
