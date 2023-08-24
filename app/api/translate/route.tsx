@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       const llm = new ChatOpenAI({
         streaming: true,
         temperature: 0,
-        // modelName: "gpt-3.5-turbo",
+        modelName: "gpt-3.5-turbo-16k-0613",
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token: string) => {
             await writer.ready;
@@ -68,8 +68,8 @@ export async function POST(req: Request) {
     } else {
       // For a non-streaming response we can just await the result of the
       // chain.run() call and return it.
-      const llm = new ChatOpenAI({ temperature: 0 });
-      const chain = new LLMChain({ prompt, llm });
+      const chat = new ChatOpenAI({ temperature: 0 });
+      const chain = new LLMChain({ prompt, llm: chat });
       const response = await chain.call({
         input_language: inputLang,
         output_language: outputLang,
