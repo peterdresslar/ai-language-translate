@@ -19,6 +19,7 @@ export default function Translate() {
     const [translateMode, setTranslateMode] = useState("toSamoan");
     const [input, setInput] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
+    const [modelConfigId, setModelConfigId] = useState(1);
 
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
@@ -64,7 +65,7 @@ export default function Translate() {
                 //determine which translateMode we are in by reading the radio button value
                 await fetchEventSource('/api/translate', {
                     method: 'POST',
-                    body: JSON.stringify({ translateMode: translateMode, input: input }),
+                    body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                     headers: { 'Content-Type': 'application/json' },
                     onmessage(ev) {
                         setResults((r) => r + ev.data);

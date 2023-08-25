@@ -1,6 +1,3 @@
-// See nextjs-langchain-example
-
-
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { LLMChain } from 'langchain/chains';
 import { CallbackManager } from 'langchain/callbacks';
@@ -10,21 +7,43 @@ import {
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 
+// TODO how do we call the other route from this API route most efficiently?
+// call configs/getOne(modelConfigId) to get the modelConfig from the database
+async function resolveModelConfig(modelConfigId: number) {
+  try {
+    console.log("fetching modelConfig for modelConfigId " + modelConfigId + " from database.");
+    //const modelConfig = await getOne(modelConfigId);
+    // for now, return a hard-coded modelConfig
+    const modelConfig = `{
+      "modelConfigId": 1,
+      "configName": "GPT-4 default settings",
+      "modelName": "GPT-4",
+      "temperature": 0,
+      "streaming": true,
+      "maxTokens": 2000,}`;
+    return modelConfig;
+  } catch (error) {
+    console.log("error fetching modelConfig for modelConfigId ${modelConfigId}");
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const { translateMode, input } = await req.json();
+    const { translateMode, input, modelConfigId } = await req.json();
     console.log('translateMode', translateMode);
     console.log('input', input);
+    console.log('modelConfigId', modelConfigId);
+    const modelConfig = await resolveModelConfig(modelConfigId); // this needs to be pushed into an object
     const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
     const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
     const prompt = ChatPromptTemplate.fromPromptMessages([
       SystemMessagePromptTemplate.fromTemplate(
-        "You are a helpful assistant that translates '{input_language}' to '{output_language}'."
+        "You are a language translator that translates '{input_language}' to '{output_language}' as precisely as possible."
       ),
       HumanMessagePromptTemplate.fromTemplate('{text}'),
     ]);
     // Check if the request is for a streaming response.
-    const streaming = req.headers.get('accept') === 'text/event-stream';
+    const streaming = true; //modelConfig.streaming;
     console.log('server streaming', streaming);
     if (streaming) {
       // For a streaming response we need to use a TransformStream to
