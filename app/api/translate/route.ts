@@ -16,11 +16,12 @@ async function resolveModelConfig(modelConfigId: number) {
     console.log("fetching modelConfig for modelConfigId " + modelConfigId + " from database.");
     //const modelConfig = await getOne(modelConfigId);
     // for now, return a hard-coded modelConfig
-    const c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "GPT-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    const c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     const mC: ModelConfig = JSON.parse(c);
     return mC;
   } catch (error) {
     console.log("error fetching modelConfig for modelConfigId ${modelConfigId}");
+    return undefined;
   }
 }
 
@@ -56,8 +57,9 @@ export async function POST(req: Request) {
         console.log('creating llm');
         const llm = new ChatOpenAI({
           streaming: true,
-          temperature: 0,
-          modelName: "gpt-4",
+          temperature: modelConfig.temperature,
+          modelName: modelConfig.modelName,
+          maxTokens: modelConfig.maxTokens,
           callbackManager: CallbackManager.fromHandlers({
             handleLLMNewToken: async (token: string) => {
               await writer.ready;
