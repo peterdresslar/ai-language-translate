@@ -1,6 +1,3 @@
-// Hey Github Copilot, are you there? 
-// I need help with this component.
-
 // This component contains controls that allow the user to input text (up to 4000 tokens worth) and submit it to be translated from English to Samoan or Samoan to English.
 // There should be a text area to capture the user's input.
 // There should be a toggle swith to select the direction of translation. (English to Samoan or Samoan to English)
@@ -23,6 +20,7 @@ export default function Translate() {
 
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
+    const [transactionId , setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
 
     const handleInputChange = (value: string) => {
         setInput(value);
@@ -38,6 +36,7 @@ export default function Translate() {
     const handleClear = () => {
         setInput("");
         setResults("");
+        setTransactionId("");
         document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
         setClipboardBtnText("Copy to Clipboard");
     };
@@ -52,6 +51,9 @@ export default function Translate() {
         async (e: FormEvent) => {
             e.preventDefault();
             console.log('in event');
+            
+            // first, get a generated transactionId from supabase. This will allow us to track the user feedback for this translation.
+            // using the Supabase client
 
             // Prevent multiple submissions.
             if (inflight) return;
@@ -68,9 +70,11 @@ export default function Translate() {
                     body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                     headers: { 'Content-Type': 'application/json' },
                     onmessage(ev) {
+                        console.log(ev);
                         setResults((r) => r + ev.data);
                     },
                 });
+                console.log('transactionId: ' + transactionId);
             } catch (error) {
                 console.error(error);
                 setInflight(false);
