@@ -35,6 +35,11 @@ export async function POST(req: Request) {
     if (modelConfig === undefined) {
       //do something to handle this error
       console.log("modelConfig is undefined");
+      return new Response("", {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+        statusText: 'Sorry, something went wrong when trying to access that AI model. Please try another model. If you continue to have problems, please contact us.'
+      });
     } else {
       console.log("modelConfig is defined with name " + modelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
