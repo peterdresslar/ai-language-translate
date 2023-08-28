@@ -8,33 +8,37 @@
 'use client';
 import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { FormEvent, useCallback, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 
 import { createClient } from '@supabase/supabase-js';
 
-const dbClient = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_PRIVATE_KEY
-);
-    
 export const runtime = 'edge';
 
 export default function Translate() {
     const [translateMode, setTranslateMode] = useState("toSamoan");
+    const [sourceLang, setSourceLang] = useState("en");
+    const [targetLang, setTargetLang] = useState("sm");
     const [input, setInput] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
     const [modelConfigId, setModelConfigId] = useState(1);
+    const [userId, setUserId] = useState(1); // later we can add users
 
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
     const [transactionId , setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
 
+
+    // Eventually should move this to a route  
     const getNewTransactionId = async () => {
+        const dbClient = createClient(
+            process.env.SUPABASE_URL,
+            process.env.SUPABASE_PRIVATE_KEY
+        );
         let transactionId = "";
         try {
             let {data, error} = await dbClient
             .from('translations')
-            .insert({ user_id: 1})
+            .insert({ user_id: userId, model_config_id: modelConfigId, translate_mode: translateMode, prompt: input, source_lang: sourceLang, target_lang: targetLang, response: results })
             .select();
             console.log(data);
             if (data) {
@@ -44,6 +48,18 @@ export default function Translate() {
           console.log('New transaction insert error', error);
         } finally {
             return transactionId;
+        }
+    }
+
+    const updateTranslateMode = (value: string) => {
+        setTranslateMode(value);
+        //flip the source and target languages
+        if (value === "toSamoan") {
+            setSourceLang("en");
+            setTargetLang("sm");
+        } else if (value === "toEnglish") {
+            setSourceLang("sm");
+            setTargetLang("en");
         }
     }
 
@@ -86,9 +102,6 @@ export default function Translate() {
             // Reset results
             setInflight(true);
             setResults("");
-            const tId = await getNewTransactionId();
-            console.log('data: ' + tId);
-            setTransactionId(tId);
 
             try {
                 console.log('streaming');
@@ -106,6 +119,9 @@ export default function Translate() {
                 setInflight(false);
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
+                const tId = await getNewTransactionId();
+                console.log('transactionId: ' + tId);
+                setTransactionId(tId);
                 setInflight(false);
             }
         },
@@ -125,12 +141,12 @@ export default function Translate() {
                                 <div>
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
                                         <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan"
-                                            onChange={(e) => setTranslateMode(e.target.value)} />
+                                            onChange={(e) => updateTranslateMode(e.target.value)} />
                                         <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
                                     </div>
                                     <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
                                         <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish"
-                                            onChange={(e) => setTranslateMode(e.target.value)} />
+                                            onChange={(e) => updateTranslateMode(e.target.value)} />
                                         <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
                                     </div>
                                 </div>
