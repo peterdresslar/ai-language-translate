@@ -10,6 +10,13 @@ import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { FormEvent, useCallback, useState } from 'react';
 
+import { createClient } from '@supabase/supabase-js';
+
+const dbClient = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PRIVATE_KEY
+);
+    
 export const runtime = 'edge';
 
 export default function Translate() {
@@ -21,6 +28,24 @@ export default function Translate() {
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
     const [transactionId , setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
+
+    const getNewTransactionId = async () => {
+        let transactionId = "";
+        try {
+            let {data, error} = await dbClient
+            .from('translations')
+            .insert({ user_id: 1})
+            .select();
+            console.log(data);
+            if (data) {
+              transactionId = data[0].transaction_id;
+            }
+        } catch (error) {
+          console.log('New transaction insert error', error);
+        } finally {
+            return transactionId;
+        }
+    }
 
     const handleInputChange = (value: string) => {
         setInput(value);
@@ -61,6 +86,9 @@ export default function Translate() {
             // Reset results
             setInflight(true);
             setResults("");
+            const tId = await getNewTransactionId();
+            console.log('data: ' + tId);
+            setTransactionId(tId);
 
             try {
                 console.log('streaming');
@@ -70,11 +98,9 @@ export default function Translate() {
                     body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                     headers: { 'Content-Type': 'application/json' },
                     onmessage(ev) {
-                        console.log(ev);
                         setResults((r) => r + ev.data);
                     },
                 });
-                console.log('transactionId: ' + transactionId);
             } catch (error) {
                 console.error(error);
                 setInflight(false);

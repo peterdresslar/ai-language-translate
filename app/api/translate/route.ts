@@ -62,6 +62,7 @@ export async function POST(req: Request) {
         const writer = stream.writable.getWriter();
         console.log('creating llm');
         const llm = new ChatOpenAI({
+          openAIApiKey: process.env.OPENAI_API_KEY,
           streaming: true,
           temperature: modelConfig.temperature,
           modelName: modelConfig.modelName,

@@ -16,6 +16,7 @@
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@supabase/supabase-js": "^2.33.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "20.0.0",
     "@types/react": "18.2.5",
