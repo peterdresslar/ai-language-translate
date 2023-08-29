@@ -21,6 +21,8 @@ const dbClient = createClient(
 
 export default function Translate() {
     const [translateMode, setTranslateMode] = useState("toSamoan");
+    const [upvoteDisabled, setUpvoteDisabled] = useState(true);
+    const [downvoteDisabled, setDownvoteDisabled] = useState(true);
     const [sourceLang, setSourceLang] = useState("en");
     const [targetLang, setTargetLang] = useState("sm");
     const [input, setInput] = useState("");
@@ -60,6 +62,23 @@ export default function Translate() {
         }
     }
 
+    const updateTranslationWithFeedback = async (feedback: String, transactionId: String) => {
+        console.log("updating db with feedback " + feedback + " for transactionId " + transactionId);
+        try {
+            let { data, error } = await dbClient
+            .from('translations')
+            .update({ feedback_state: feedback })
+            .eq('transaction_id', transactionId)
+            if (error) {
+                console.log("m " + error.message);
+            } else {
+                console.log('feedback updated');
+            }
+        } catch (error) {
+            console.log('Feedback update error', error);
+        }
+    }
+
     const updateTranslateMode = (value: string) => {
         setTranslateMode(value);
         //flip the source and target languages
@@ -88,13 +107,57 @@ export default function Translate() {
         setResults("");
         setTransactionId("");
         document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+        disableFeedbackButtons();
         setClipboardBtnText("Copy to Clipboard");
     };
 
     const handleClippy = (value: string) => {
         navigator.clipboard.writeText(value);
         //write a clipboard icon to the clipboard button text
-        setClipboardBtnText("Copied. ☑️");
+        setClipboardBtnText("Copied. 📋");
+    };
+
+    const enableFeedbackButtons = () => {
+        //enable the feedback buttons
+        setUpvoteDisabled(false);
+        setDownvoteDisabled(false);
+    };
+
+    const disableFeedbackButtons = () => {
+        //disable the feedback buttons
+        setUpvoteDisabled(true);
+        setDownvoteDisabled(true);
+    };
+
+    // const handleUpvote = async () => {
+    //     console.log("upvote clicked");
+    //     //change the text of the feedback button 
+    //     document.getElementById("btnUpvote")!.innerText = "👍 lelei ☑️";
+    //     //disable the feedback buttons
+    //     disableFeedbackButtons();
+    //     //update the translation record with the feedback
+    //     updateTranslationWithFeedback("upvote", transactionId);
+    // };
+
+    const handleUpvote = () => {
+        console.log("upvote clicked");
+        //change the text of the feedback button
+        document.getElementById("btnUpvote")!.innerText = "👎 leaga ☑️";
+        //disable the feedback buttons
+        disableFeedbackButtons();
+        //update the translation record with the feedback
+        updateTranslationWithFeedback("upvote", transactionId);    
+    }
+
+
+    const handleDownvote = async () => {
+        console.log("downvote clicked");
+        //change the text of the feedback button
+        document.getElementById("btnDownvote")!.innerText = "👎 leaga ☑️";
+        //disable the feedback buttons
+        disableFeedbackButtons();
+        //update the translation record with the feedback
+        updateTranslationWithFeedback("downvote", transactionId);
     };
 
     const submitHandler = useCallback(
@@ -125,12 +188,13 @@ export default function Translate() {
                     onclose() {
                     },
                 });
-                // get the inner text of the resultsTextArea and write it to the database
+                // get the inner text of the resultsTextArea and write it to the database.
+                //note that there should be a better stateful way to do this.
                 const resultsText = document.getElementById("resultsTextArea")!.innerText;
                 const tId = await writeTranslationToDb(resultsText);
                 console.log('transactionId: ' + tId);
                 setTransactionId(tId);
-                console.log
+                enableFeedbackButtons();
             } catch (error) {
                 console.error(error);
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
@@ -199,22 +263,16 @@ export default function Translate() {
                         <div className="flex justify-end col-span-1 gap-1">
                             <div>
                                 <button className="control-strip-item"
-                                    disabled
-                                    data-te-toggle="tooltip"
-                                    data-te-placement="top"
-                                    data-te-ripple-init
-                                    data-te-ripple-color="light"
-                                    title="User feedback coming soon!">Good</button>
+                                    disabled={upvoteDisabled}
+                                    id="btnUpvote"
+                                    onClick={(e) => handleUpvote()}>👍 lelei</button>
                             </div>
                             {/* // Here is the thumbs down button. */}
                             <div>
                                 <button className="control-strip-item"
-                                    disabled
-                                    data-te-toggle="tooltip"
-                                    data-te-placement="top"
-                                    data-te-ripple-init
-                                    data-te-ripple-color="light"
-                                    title="User feedback coming soon!">Bad</button>
+                                    disabled={downvoteDisabled}
+                                    id="btnDownvote"
+                                    onClick={(e) => handleDownvote()}>👎 leaga</button>
                             </div>
                         </div>
                     </div>

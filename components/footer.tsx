@@ -61,7 +61,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="">
-            <div>Coming Soon: Feedback</div>
+            <div>Coming Soon: Multiple Models!!</div>
             
           </div>
         </div>
