@@ -109,6 +109,8 @@ export default function Translate() {
         document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
         disableFeedbackButtons();
         setClipboardBtnText("Copy to Clipboard");
+        document.getElementById("btnUpvote")!.innerText = "👍 lelei";
+        document.getElementById("btnDownvote")!.innerText = "👎 leaga";
     };
 
     const handleClippy = (value: string) => {
@@ -124,20 +126,10 @@ export default function Translate() {
     };
 
     const disableFeedbackButtons = () => {
-        //disable the feedback buttons
+        //disable the feedback buttons and clear out any checkmarks from the text
         setUpvoteDisabled(true);
         setDownvoteDisabled(true);
     };
-
-    // const handleUpvote = async () => {
-    //     console.log("upvote clicked");
-    //     //change the text of the feedback button 
-    //     document.getElementById("btnUpvote")!.innerText = "👍 lelei ☑️";
-    //     //disable the feedback buttons
-    //     disableFeedbackButtons();
-    //     //update the translation record with the feedback
-    //     updateTranslationWithFeedback("upvote", transactionId);
-    // };
 
     const handleUpvote = () => {
         console.log("upvote clicked");
