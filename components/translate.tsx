@@ -14,9 +14,14 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'edge';
 
+// const dbClient = createClient(
+//     "https://yjhgcbdfqzzuynvzqbys.supabase.co",
+//     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqaGdjYmRmcXp6dXludnpxYnlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY5MzE1ODEwNywiZXhwIjoyMDA4NzM0MTA3fQ.8K63P7GjzW6fdUJmNokNm-I_mG2cCOp_ji2ke3QXKyk"
+// );
+
 const dbClient = createClient(
-    "https://yjhgcbdfqzzuynvzqbys.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqaGdjYmRmcXp6dXludnpxYnlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY5MzE1ODEwNywiZXhwIjoyMDA4NzM0MTA3fQ.8K63P7GjzW6fdUJmNokNm-I_mG2cCOp_ji2ke3QXKyk"
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PRIVATE_KEY
 );
 
 export default function Translate() {
