@@ -5,6 +5,7 @@ import SectionTitle from "../components/sectionTitle";
 import Translate from "../components/translate";
 import Footer from "../components/footer";
 import Message from "../components/message";
+import { Suspense } from "react";
 
 const Home = () => {
   return (
@@ -26,7 +27,9 @@ const Home = () => {
         translated="This is a beta version of the translator, experimenting with AI-powered processing."
         message="O se laasaga sili lea mo lenei meafaigaluega. O lo'o fa'aaogaina le Atamai Fa'amatalaga. E tele a matou galuega e fai, ae matou te faafetai atu mo le asiasi mai ma fesoasoani mai ia matou manuia.">
         </Message>
+        <Suspense fallback="Loading...">
       <Translate />
+      </Suspense>
       <Footer />
     </>
   );
