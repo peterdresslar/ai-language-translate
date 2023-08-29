@@ -27,11 +27,10 @@ async function resolveModelConfig(modelConfigId: number) {
 
 export async function POST(req: Request) {
   try {
-    const { translateMode, input, modelConfigId, transactionId } = await req.json();
+    const { translateMode, input, modelConfigId } = await req.json();
     console.log('translateMode', translateMode);
     console.log('input', input);
     console.log('modelConfigId', modelConfigId);
-    console.log('transactionId', transactionId);
     const modelConfig = await resolveModelConfig(modelConfigId);
     if (modelConfig === undefined) {
       //do something to handle this error

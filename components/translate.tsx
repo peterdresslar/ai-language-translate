@@ -14,6 +14,11 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'edge';
 
+const dbClient = createClient(
+    "https://yjhgcbdfqzzuynvzqbys.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqaGdjYmRmcXp6dXludnpxYnlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY5MzE1ODEwNywiZXhwIjoyMDA4NzM0MTA3fQ.8K63P7GjzW6fdUJmNokNm-I_mG2cCOp_ji2ke3QXKyk"
+);
+
 export default function Translate() {
     const [translateMode, setTranslateMode] = useState("toSamoan");
     const [sourceLang, setSourceLang] = useState("en");
@@ -25,27 +30,31 @@ export default function Translate() {
 
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
-    const [transactionId , setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
+    const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
 
 
     // Eventually should move this to a route  
-    const getNewTransactionId = async () => {
-        const dbClient = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_PRIVATE_KEY
-        );
+    // returns the transactionId
+    const writeTranslationToDb = async (resultsText: String) => {
         let transactionId = "";
+        console.log("writing to db for sourcelang " + sourceLang + " and targetlang " + targetLang);
         try {
-            let {data, error} = await dbClient
-            .from('translations')
-            .insert({ user_id: userId, model_config_id: modelConfigId, translate_mode: translateMode, prompt: input, source_lang: sourceLang, target_lang: targetLang, response: results })
-            .select();
-            console.log(data);
+            let { data, error } = await dbClient
+                .from('translations')
+                .insert({ user_id: userId, model_config: modelConfigId, prompt: input, source_lang: sourceLang, target_lang: targetLang, response: resultsText })
+                .select();
+            if (error) {
+                console.log("m " + error.message);
+                console.log("h " + error.hint);
+                console.log("d " + error.details);
+                return transactionId;
+            }
             if (data) {
-              transactionId = data[0].transaction_id;
+                console.log('data is not null');
+                transactionId = data[0].transaction_id;
             }
         } catch (error) {
-          console.log('New transaction insert error', error);
+            console.log('New transaction insert error', error);
         } finally {
             return transactionId;
         }
@@ -92,7 +101,7 @@ export default function Translate() {
         async (e: FormEvent) => {
             e.preventDefault();
             console.log('in event');
-            
+
             // first, get a generated transactionId from supabase. This will allow us to track the user feedback for this translation.
             // using the Supabase client
 
@@ -113,15 +122,19 @@ export default function Translate() {
                     onmessage(ev) {
                         setResults((r) => r + ev.data);
                     },
+                    onclose() {
+                    },
                 });
-            } catch (error) {
-                console.error(error);
-                setInflight(false);
-                setResults("An error has occurred. Please try again. Error: " + error + ".");
-            } finally {
-                const tId = await getNewTransactionId();
+                // get the inner text of the resultsTextArea and write it to the database
+                const resultsText = document.getElementById("resultsTextArea")!.innerText;
+                const tId = await writeTranslationToDb(resultsText);
                 console.log('transactionId: ' + tId);
                 setTransactionId(tId);
+                console.log
+            } catch (error) {
+                console.error(error);
+                setResults("An error has occurred. Please try again. Error: " + error + ".");
+            } finally {
                 setInflight(false);
             }
         },
@@ -179,29 +192,29 @@ export default function Translate() {
                     <div className="grid grid-cols-3">
                         {/* // Here is the button to copy the results pane to the clipboard. */}
                         <div className="col-span-2 ">
-                            <button className="control-strip-item" id="btnCopy" 
+                            <button className="control-strip-item" id="btnCopy"
                                 onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
                         </div>
                         {/* // Here is the thumbs up button. */}
                         <div className="flex justify-end col-span-1 gap-1">
                             <div>
-                                <button className="control-strip-item" 
-                                disabled
-                                data-te-toggle="tooltip"
-                                data-te-placement="top"
-                                data-te-ripple-init
-                                data-te-ripple-color="light"
-                                title="User feedback coming soon!">Good</button>
+                                <button className="control-strip-item"
+                                    disabled
+                                    data-te-toggle="tooltip"
+                                    data-te-placement="top"
+                                    data-te-ripple-init
+                                    data-te-ripple-color="light"
+                                    title="User feedback coming soon!">Good</button>
                             </div>
                             {/* // Here is the thumbs down button. */}
                             <div>
-                                <button className="control-strip-item" 
-                                disabled
-                                data-te-toggle="tooltip"
-                                data-te-placement="top"
-                                data-te-ripple-init
-                                data-te-ripple-color="light"
-                                title="User feedback coming soon!">Bad</button>
+                                <button className="control-strip-item"
+                                    disabled
+                                    data-te-toggle="tooltip"
+                                    data-te-placement="top"
+                                    data-te-ripple-init
+                                    data-te-ripple-color="light"
+                                    title="User feedback coming soon!">Bad</button>
                             </div>
                         </div>
                     </div>
