@@ -44,3 +44,7 @@
 .results-text-area {
   @apply w-full p-2.5 whitespace-pre-wrap
 }
+
+.ReactCollapse--collapse {
+  transition: height 500ms;
+}

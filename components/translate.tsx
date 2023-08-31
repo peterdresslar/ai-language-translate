@@ -9,7 +9,6 @@
 import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-
 import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'edge';
@@ -33,7 +32,6 @@ export default function Translate() {
     const [inflight, setInflight] = useState(false);
     const [results, setResults] = useState("Results will appear here.");
     const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
-
 
     // Eventually should move this to a route  
     // returns the transactionId
@@ -66,9 +64,9 @@ export default function Translate() {
         console.log("updating db with feedback " + feedback + " for transactionId " + transactionId);
         try {
             let { data, error } = await dbClient
-            .from('translations')
-            .update({ feedback_state: feedback })
-            .eq('transaction_id', transactionId)
+                .from('translations')
+                .update({ feedback_state: feedback })
+                .eq('transaction_id', transactionId)
             if (error) {
                 console.log("m " + error.message);
             } else {
@@ -138,7 +136,7 @@ export default function Translate() {
         //disable the feedback buttons
         disableFeedbackButtons();
         //update the translation record with the feedback
-        updateTranslationWithFeedback("upvote", transactionId);    
+        updateTranslationWithFeedback("upvote", transactionId);
     }
 
 
@@ -198,81 +196,107 @@ export default function Translate() {
     );
 
     return (
-        <Container className="flex flex-wrap mb-20 lg:gap-10 lg:flex-nowrap h-5/6 ">
-            {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
-            <div className="translate-pane-left">
-                {/* Here is the control strip */}
-                <form onSubmit={submitHandler}>
-                    <div className="control-strip">
-                        {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
-                        <div className="grid grid-cols-3">
-                            <div className="col-span-2 ">
-                                <div>
-                                    <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan"
-                                            onChange={(e) => updateTranslateMode(e.target.value)} />
-                                        <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
+        <Container className="mb-20">
+            {/* Row for all of the controls and operations */}
+            <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">
+                {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
+                <div className="translate-pane-left">
+                    {/* Here is the control strip */}
+                    <form onSubmit={submitHandler}>
+                        <div className="control-strip">
+                            {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
+                            <div className="grid grid-cols-3">
+                                <div className="col-span-2 ">
+                                    <div>
+                                        <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+                                            <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan"
+                                                onChange={(e) => updateTranslateMode(e.target.value)} />
+                                            <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
+                                        </div>
+                                        <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
+                                            <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish"
+                                                onChange={(e) => updateTranslateMode(e.target.value)} />
+                                            <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                        <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish"
-                                            onChange={(e) => updateTranslateMode(e.target.value)} />
-                                        <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
+                                </div>
+                                {/* // Here is the button to clear the text area. */}
+                                <div className="flex justify-end col-span-1 gap-1">
+                                    <div>
+                                        <button className="control-strip-item" id="btnClear" type="reset" onClick={handleClear}>Clear</button>
+                                    </div>
+                                    {/* // Here is the button to submit the text area. */}
+                                    <div>
+                                        <button className="control-strip-item font-bold" id="btnSubmit" type="submit" disabled>Submit</button>
                                     </div>
                                 </div>
                             </div>
-                            {/* // Here is the button to clear the text area. */}
+                        </div>
+                        {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
+                        <div className="text-input-container">
+                            <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."
+                                onChange={(e) => handleInputChange(e.target.value)}>
+                            </textarea>
+                        </div>
+                    </form>
+                </div>
+
+                {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
+                <div className="translate-pane-right">
+                    {/* // Here is the control strip */}
+                    <div className="control-strip">
+                        <div className="grid grid-cols-3">
+                            {/* // Here is the button to copy the results pane to the clipboard. */}
+                            <div className="col-span-2 ">
+                                <button className="control-strip-item" id="btnCopy"
+                                    onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
+                            </div>
+                            {/* // Here is the thumbs up button. */}
                             <div className="flex justify-end col-span-1 gap-1">
                                 <div>
-                                    <button className="control-strip-item" id="btnClear" type="reset" onClick={handleClear}>Clear</button>
+                                    <button className="control-strip-item"
+                                        disabled={upvoteDisabled}
+                                        id="btnUpvote"
+                                        onClick={(e) => handleUpvote()}>👍 lelei</button>
                                 </div>
-                                {/* // Here is the button to submit the text area. */}
+                                {/* // Here is the thumbs down button. */}
                                 <div>
-                                    <button className="control-strip-item font-bold" id="btnSubmit" type="submit" disabled>Submit</button>
+                                    <button className="control-strip-item"
+                                        disabled={downvoteDisabled}
+                                        id="btnDownvote"
+                                        onClick={(e) => handleDownvote()}>👎 leaga</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
-                    <div className="text-input-container">
-                        <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."
-                            onChange={(e) => handleInputChange(e.target.value)}>
-                        </textarea>
+                    {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
+                    <div className="results-container">
+                        <pre id="resultsTextArea" className="results-text-area">{results}</pre>
                     </div>
-                </form>
+                </div>
             </div>
-
-            {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
-            <div className="translate-pane-right">
-                {/* // Here is the control strip */}
-                <div className="control-strip">
-                    <div className="grid grid-cols-3">
-                        {/* // Here is the button to copy the results pane to the clipboard. */}
-                        <div className="col-span-2 ">
-                            <button className="control-strip-item" id="btnCopy"
-                                onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
+            {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
+            <hr className="mt-10"></hr>
+            <div className="technical-options flex justify-center mt-5">
+                <div className="grid grid-rows-2">
+                    <div className="row flex justify-center">
+                        <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
+                    </div>
+                    <div className="row flex gap-4 grid-cols-2 justify-center">
+                        <div className="col-span-1">
+                            {/* model selector dropdown with the two hardcoded options for now */}
+                            <select className="form-select control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
+                                <option value="1">GPT-4 (default model)</option>
+                                <option value="2">GPT-3.5</option>
+                            </select>
                         </div>
-                        {/* // Here is the thumbs up button. */}
-                        <div className="flex justify-end col-span-1 gap-1">
-                            <div>
-                                <button className="control-strip-item"
-                                    disabled={upvoteDisabled}
-                                    id="btnUpvote"
-                                    onClick={(e) => handleUpvote()}>👍 lelei</button>
-                            </div>
-                            {/* // Here is the thumbs down button. */}
-                            <div>
-                                <button className="control-strip-item"
-                                    disabled={downvoteDisabled}
-                                    id="btnDownvote"
-                                    onClick={(e) => handleDownvote()}>👎 leaga</button>
-                            </div>
+                        <div className="col-span-1">
+                            <pre className="text-sm">Application version 0.0.1</pre>
                         </div>
                     </div>
+
                 </div>
-                {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
-                <div className="results-container">
-                    <pre id="resultsTextArea" className="results-text-area">{results}</pre>
-                </div>
+
             </div>
         </Container>
     );
