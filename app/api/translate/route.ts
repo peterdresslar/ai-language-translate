@@ -7,7 +7,7 @@ import {
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 
-import type { ModelConfig } from '../../ModelConfig'; 
+import type { ModelConfig } from '../../ModelConfig';
 
 // TODO how do we call the other route from this API route most efficiently?
 // call configs/getOne(modelConfigId) to get the modelConfig from the database
@@ -53,62 +53,47 @@ export async function POST(req: Request) {
       // Check if the request is for a streaming response.
       const streaming = modelConfig.streaming;
       console.log('server streaming', streaming);
-      if (streaming) {
-        // For a streaming response we need to use a TransformStream to
-        // convert the LLM's callback-based API into a stream-based API.
-        const encoder = new TextEncoder();
-        const stream = new TransformStream();
-        const writer = stream.writable.getWriter();
-        console.log('creating llm');
-        const llm = new ChatOpenAI({
-          openAIApiKey: process.env.OPENAI_API_KEY,
-          streaming: true,
-          temperature: modelConfig.temperature,
-          modelName: modelConfig.modelName,
-          maxTokens: modelConfig.maxTokens,
-          callbackManager: CallbackManager.fromHandlers({
-            handleLLMNewToken: async (token: string) => {
-              await writer.ready;
-              await writer.write(encoder.encode(`data: ${token}\n\n`));
-            },
-            handleLLMEnd: async () => {
-              await writer.ready;
-              await writer.close();
-            },
-            handleLLMError: async (e: Error) => {
-              await writer.ready;
-              await writer.abort(e);
-            },
-          }),
-        });
-        console.log('creating chain');
-        const chain = new LLMChain({ prompt, llm });
-        // We don't need to await the result of the chain.run() call because
-        // the LLM will invoke the callbackManager's handleLLMEnd() method
-        chain.call({
-          input_language: inputLang,
-          output_language: outputLang,
-          text: input
-        }).catch((e: Error) => console.error(e));
-        console.log('returning response');
-        return new Response(stream.readable, {
-          headers: { 'Content-Type': 'text/event-stream' },
-        });
-      } else {
-        // For a non-streaming response we can just await the result of the
-        // chain.run() call and return it.
-        const chat = new ChatOpenAI({ temperature: 0 });
-        const chain = new LLMChain({ prompt, llm: chat });
-        const response = await chain.call({
-          input_language: inputLang,
-          output_language: outputLang,
-          text: input
-        });
+      // For a streaming response we need to use a TransformStream to
+      // convert the LLM's callback-based API into a stream-based API.
+      const encoder = new TextEncoder();
+      const stream = new TransformStream();
+      const writer = stream.writable.getWriter();
+      console.log('creating llm');
+      const llm = new ChatOpenAI({
+        openAIApiKey: process.env.OPENAI_API_KEY,
+        streaming: true,
+        temperature: modelConfig.temperature,
+        modelName: modelConfig.modelName,
+        maxTokens: modelConfig.maxTokens,
+        callbackManager: CallbackManager.fromHandlers({
+          handleLLMNewToken: async (token: string) => {
+            await writer.ready;
+            await writer.write(encoder.encode(`data: ${token}\n\n`));
+          },
+          handleLLMEnd: async () => {
+            await writer.ready;
+            await writer.close();
+          },
+          handleLLMError: async (e: Error) => {
+            await writer.ready;
+            await writer.abort(e);
+          },
+        }),
+      });
+      console.log('creating chain');
+      const chain = new LLMChain({ prompt, llm });
+      // We don't need to await the result of the chain.run() call because
+      // the LLM will invoke the callbackManager's handleLLMEnd() method
+      chain.call({
+        input_language: inputLang,
+        output_language: outputLang,
+        text: input
+      }).catch((e: Error) => console.error(e));
+      console.log('returning response');
+      return new Response(stream.readable, {
+        headers: { 'Content-Type': 'text/event-stream' },
+      });
 
-        return new Response(JSON.stringify(response), {
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
     }
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as any).message }), {
