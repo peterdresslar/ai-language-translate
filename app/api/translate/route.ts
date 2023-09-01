@@ -12,11 +12,15 @@ import type { ModelConfig } from '../../ModelConfig';
 // TODO how do we call the other route from this API route most efficiently?
 // call configs/getOne(modelConfigId) to get the modelConfig from the database
 async function resolveModelConfig(modelConfigId: number) {
+  let c;
   try {
-    console.log("fetching modelConfig for modelConfigId " + modelConfigId + " from database.");
-    //const modelConfig = await getOne(modelConfigId);
-    // for now, return a hard-coded modelConfig
-    const c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    if (modelConfigId == 2) {
+      c = '{"modelConfigId": 2, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    } else if (modelConfigId == 3) { // LLama/Replicate
+      c = '{"modelConfigId": 3, "configName": "LLama/Replicate default settings", "modelName": Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    } else { // default to GPT-4
+       c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    }
     const mC: ModelConfig = JSON.parse(c);
     return mC;
   } catch (error) {
