@@ -50,9 +50,6 @@ export async function POST(req: Request) {
         ),
         HumanMessagePromptTemplate.fromTemplate('{text}'),
       ]);
-      // Check if the request is for a streaming response.
-      const streaming = modelConfig.streaming;
-      console.log('server streaming', streaming);
       // For a streaming response we need to use a TransformStream to
       // convert the LLM's callback-based API into a stream-based API.
       const encoder = new TextEncoder();
