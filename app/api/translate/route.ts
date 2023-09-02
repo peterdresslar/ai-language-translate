@@ -6,20 +6,23 @@ import {
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
+import { Replicate } from 'langchain/llms/replicate';
 
 import type { ModelConfig } from '../../ModelConfig';
 
-// TODO how do we call the other route from this API route most efficiently?
-// call configs/getOne(modelConfigId) to get the modelConfig from the database
+export const runtime = 'edge';
+
+
+// This is pretty ugly but very likely we will need to split into different routes.
 async function resolveModelConfig(modelConfigId: number) {
   let c;
   try {
     if (modelConfigId == 2) {
       c = '{"modelConfigId": 2, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     } else if (modelConfigId == 3) { // LLama/Replicate
-      c = '{"modelConfigId": 3, "configName": "LLama/Replicate default settings", "modelName": Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+      c = '{"modelConfigId": 3, "configName": "LLama-Replicate default settings", "modelName": "Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     } else { // default to GPT-4
-       c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+      c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     }
     const mC: ModelConfig = JSON.parse(c);
     return mC;
@@ -44,7 +47,8 @@ export async function POST(req: Request) {
         status: 400,
         statusText: 'Sorry, something went wrong when trying to access that AI model. Please try another model. If you continue to have problems, please contact us.'
       });
-    } else {
+    // else if one of the two OpenAI modelconfigs
+    } else if (modelConfig.modelName === 'gpt-4' || modelConfig.modelName === 'gpt-3.5-turbo') {
       console.log("modelConfig is defined with name " + modelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
       const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
@@ -95,8 +99,21 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'text/event-stream' },
       });
 
+    } else if (modelConfig.modelName === 'Llama70b') {
+      console.log("modelConfig is defined with name " + modelConfig.modelName);
+      const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan';
+      const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
+      const llm = new Replicate({
+        model: 'replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf'
+      });
+
+
+    } else { // should not reach
+      console.log("Something went wrong. modelConfig.modelName is " + modelConfig.modelName);
+      return;
     }
-  } catch (e) {
+      
+      } catch (e) {
     return new Response(JSON.stringify({ error: (e as any).message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -105,4 +122,3 @@ export async function POST(req: Request) {
 
 }
 
-export const runtime = 'edge';

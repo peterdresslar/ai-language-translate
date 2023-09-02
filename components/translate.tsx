@@ -167,6 +167,7 @@ export default function Translate() {
 
             try {
                 console.log('streaming');
+                console.log('modelConfigId: ' + modelConfigId);
                 //determine which translateMode we are in by reading the radio button value
                 await fetchEventSource('/api/translate', {
                     method: 'POST',
@@ -175,8 +176,7 @@ export default function Translate() {
                     onmessage(ev) {
                         setResults((r) => r + ev.data);
                     },
-                    onclose() {
-                    },
+                    
                 });
                 // get the inner text of the resultsTextArea and write it to the database.
                 //note that there should be a better stateful way to do this.
@@ -288,6 +288,7 @@ export default function Translate() {
                             <select className="form-select control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
                                 <option value="1">GPT-4 (default model)</option>
                                 <option value="2">GPT-3.5</option>
+                                <option value="3">LLama 2 70B (can be slow)</option>
                             </select>
                         </div>
                         <div className="col-span-1">
