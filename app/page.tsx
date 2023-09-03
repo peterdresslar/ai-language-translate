@@ -25,7 +25,7 @@ const Home = () => {
       </SectionTitle>
       <Message
         translated="This is a beta version of the translator, experimenting with AI-powered processing."
-        message="O se laasaga sili lea mo lenei meafaigaluega. O lo'o fa'aaogaina le Atamai Fa'amatalaga. E tele a matou galuega e fai, ae matou te faafetai atu mo le asiasi mai ma fesoasoani mai ia matou manuia.">
+        message="O le fa'aliliuga gagana fa'ata'ita'i lea; su'esu'e pe fa'afefea ona fa'aoga ma AI. Fa'afetai mo le taumafai.">
         </Message>
         <Suspense fallback="Loading...">
       <Translate />
