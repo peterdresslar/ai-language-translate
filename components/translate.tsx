@@ -296,16 +296,16 @@ export default function Translate() {
                     <div className="row flex justify-center">
                         <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
                     </div>
-                    <div className="row flex gap-4 grid-cols-2 justify-center">
-                        <div className="col-span-1">
+                    <div className="row md:flex md:items-center gap-10 justify-center">
+                        <div className="md:w-1/2">
                             {/* model selector dropdown with the two hardcoded options for now */}
-                            <select className="form-select control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
-                                <option value="1">GPT-4 (default model)</option>
-                                <option value="2">GPT-3.5</option>
-                                <option value="3">Llama 2 70B (can be slow)</option>
+                            <select className="form-select text-sm control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
+                                <option value="1">OpenAI GPT-4</option>
+                                <option value="2">OpenAI GPT-3.5</option>
+                                <option value="3">Meta Llama 2 70B (fa'atamala/slow)</option>
                             </select>
                         </div>
-                        <div className="col-span-1">
+                        <div className="md:w-1/2">
                             <pre className="text-sm">Application version 0.0.1</pre>
                         </div>
                     </div>
