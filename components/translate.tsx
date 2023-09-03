@@ -1,10 +1,3 @@
-// This component contains controls that allow the user to input text (up to 4000 tokens worth) and submit it to be translated from English to Samoan or Samoan to English.
-// There should be a text area to capture the user's input.
-// There should be a toggle swith to select the direction of translation. (English to Samoan or Samoan to English)
-// There should be a button submit and a button to clear the text area.
-// And finally, of course, there should be a text display to display the translated text. 
-// We will want users to be able to cut and paste easily from this display (we could add a clipboard copy button.)
-// Oh, very importantly, we want to be able to capture user feedback on the translation. So, we need controls for thumbs up, thumbs down, and (maybe) a text area for comments.
 'use client';
 import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
@@ -155,9 +148,6 @@ export default function Translate() {
             e.preventDefault();
             console.log('in event');
 
-            // first, get a generated transactionId from supabase. This will allow us to track the user feedback for this translation.
-            // using the Supabase client
-
             // Prevent multiple submissions.
             if (inflight) return;
 
@@ -168,16 +158,40 @@ export default function Translate() {
             try {
                 console.log('streaming');
                 console.log('modelConfigId: ' + modelConfigId);
-                //determine which translateMode we are in by reading the radio button value
-                await fetchEventSource('/api/translate', {
-                    method: 'POST',
-                    body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
-                    headers: { 'Content-Type': 'application/json' },
-                    onmessage(ev) {
-                        setResults((r) => r + ev.data);
-                    },
-                    
-                });
+                if (modelConfigId != 3) {
+                    //determine which translateMode we are in by reading the radio button value
+                    await fetchEventSource('/api/translate', {
+                        method: 'POST',
+                        body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
+                        headers: { 'Content-Type': 'application/json' },
+                        onmessage(ev) {
+                            setResults((r) => r + ev.data);
+                        }
+                    });
+                } else { // special processing for llama 2 70B model for now
+                    console.log('streaming llama 2 70B');
+
+                    // here we will fetch from /api/translate, which will return a Response with a streaming text body. we will write the stream to console and also use the stream to update our results text area.
+
+                    const response = await fetch('/api/translate', {
+                        method: 'POST',
+                        body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    const reader = response.body!.getReader();
+                    const decoder = new TextDecoder();
+                    let resultsText = "";
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            break;
+                        }
+                        resultsText += decoder.decode(value);
+                        console.log(decoder.decode(value));
+                    }
+                    setResults(resultsText);
+                    console.log('streaming llama 2 70B complete');
+                }
                 // get the inner text of the resultsTextArea and write it to the database.
                 //note that there should be a better stateful way to do this.
                 const resultsText = document.getElementById("resultsTextArea")!.innerText;
@@ -288,7 +302,7 @@ export default function Translate() {
                             <select className="form-select control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
                                 <option value="1">GPT-4 (default model)</option>
                                 <option value="2">GPT-3.5</option>
-                                <option value="3">LLama 2 70B (can be slow)</option>
+                                <option value="3">Llama 2 70B (can be slow)</option>
                             </select>
                         </div>
                         <div className="col-span-1">

@@ -6,9 +6,12 @@ import {
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
-import { Replicate } from 'langchain/llms/replicate';
+import Replicate from 'replicate';
+import { ReplicateStream, StreamingTextResponse } from 'ai';
+
 
 import type { ModelConfig } from '../../ModelConfig';
+import { text } from 'stream/consumers';
 
 export const runtime = 'edge';
 
@@ -47,7 +50,7 @@ export async function POST(req: Request) {
         status: 400,
         statusText: 'Sorry, something went wrong when trying to access that AI model. Please try another model. If you continue to have problems, please contact us.'
       });
-    // else if one of the two OpenAI modelconfigs
+      // else if one of the two OpenAI modelconfigs
     } else if (modelConfig.modelName === 'gpt-4' || modelConfig.modelName === 'gpt-3.5-turbo') {
       console.log("modelConfig is defined with name " + modelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
@@ -63,7 +66,6 @@ export async function POST(req: Request) {
       const encoder = new TextEncoder();
       const stream = new TransformStream();
       const writer = stream.writable.getWriter();
-      console.log('creating llm');
       const llm = new ChatOpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
         streaming: true,
@@ -99,21 +101,37 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'text/event-stream' },
       });
 
-    } else if (modelConfig.modelName === 'Llama70b') {
+    } else if (modelConfig.modelName === 'Llama70b') { // Completely different path for Replicate for now
+      const replicate = new Replicate({
+        auth: process.env.REPLICATE_API_KEY || '',
+      });
       console.log("modelConfig is defined with name " + modelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan';
       const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
-      const llm = new Replicate({
-        model: 'replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf'
+      const systemPrompt = "You are a professional translator. You always translate " + inputLang + " to " + outputLang + ". Even if you are not comfortable with your Samoan Langugae skills, you do your very best. Please only respond with the translated text. No commentary is requested or desired. Thank you.";
+
+      // Ask Replicate for a streaming chat completion given the prompt
+      const prediction = await replicate.predictions.create({
+        // Llama-70b-chat
+        version: '2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf',
+        input: {
+          prompt: input,
+          system_prompt: systemPrompt,
+         // verbose: true
+        },
+        stream: true,
       });
+      const stream = await ReplicateStream(prediction);
+      return new StreamingTextResponse(stream);
 
-
-    } else { // should not reach
+    } else { // this means we do not have a model. should not reach
       console.log("Something went wrong. modelConfig.modelName is " + modelConfig.modelName);
       return;
     }
-      
-      } catch (e) {
+
+  } catch (e) {
+    console.log('error using key ' + process.env.OPENAI_API_KEY);
+    console.error(e);
     return new Response(JSON.stringify({ error: (e as any).message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
