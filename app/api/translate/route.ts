@@ -15,8 +15,7 @@ import { text } from 'stream/consumers';
 
 export const runtime = 'edge';
 
-
-// This is pretty ugly but very likely we will need to split into different routes.
+//I expect we will move these to different routes
 async function resolveModelConfig(modelConfigId: number) {
   let c;
   try {
@@ -101,7 +100,7 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'text/event-stream' },
       });
 
-    } else if (modelConfig.modelName === 'Llama70b') { // Completely different path for Replicate for now
+    } else if (modelConfig.modelName === 'Llama70b') { // Completely different path for Replicate for now. Using Vercel ai package since we couldn't get the handle on langchain/replicate
       const replicate = new Replicate({
         auth: process.env.REPLICATE_API_KEY || '',
       });

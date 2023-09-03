@@ -309,9 +309,7 @@ export default function Translate() {
                             <pre className="text-sm">Application version 0.0.1</pre>
                         </div>
                     </div>
-
                 </div>
-
             </div>
         </Container>
     );

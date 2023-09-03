@@ -40,7 +40,7 @@ export default function Footer() {
                   src="/img/ascc.png"
                   alt="ASCC"
                   width="32"
-                  height="32"
+                  height={0}
                 />
               </a>
             </div>
@@ -61,8 +61,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="">
-            <div>Coming Soon: Multiple Models!!</div>
-            
+            <div>Coming Soon: Better Models</div>
           </div>
         </div>
 
