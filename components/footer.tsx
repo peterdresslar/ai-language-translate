@@ -27,10 +27,10 @@ export default function Footer() {
             </div>
 
             <div className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-              This is an open source project of PBDE in cooperation with American Samoa Community College.
+              This is an open source project of PBDE.
             </div>
 
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <a
                 href="https://amsamoa.edu"
                 target="_blank"
@@ -43,13 +43,13 @@ export default function Footer() {
                   height={0}
                 />
               </a>
-            </div>
+            </div> */}
           </div>
 
           <div>
             <div className="flex flex-wrap w-full -mt-2 -ml-3 lg:ml-0">
               {navigation.map((item, index) => (
-                <Link key={index} href="/" className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700">                 
+                <Link key={index} href="https://www.pacificbroadband.org/2023/09/01/can-ai-grasp-pacific-languages-inside-our-push-for-an-ai-samoan-translator/" className="w-full px-4 py-2 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700">                 
                     {item}
                 </Link>
               ))}
