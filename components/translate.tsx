@@ -12,7 +12,7 @@ const dbClient = createClient(
 );
 
 export default function Translate() {
-    const [translateMode, setTranslateMode] = useState("toSamoan");
+    const [translateMode, setTranslateMode] = useState("englishToSamoan");
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
     const [downvoteDisabled, setDownvoteDisabled] = useState(true);
     const [sourceLang, setSourceLang] = useState("en");
@@ -72,12 +72,17 @@ export default function Translate() {
 
     const updateTranslateMode = (value: string) => {
         setTranslateMode(value);
-        //flip the source and target languages
-        if (value === "toSamoan") {
+        if (value === "englishToSamoan") {
             setSourceLang("en");
             setTargetLang("sm");
-        } else if (value === "toEnglish") {
+        } else if (value === "samoanToEnglish") {
             setSourceLang("sm");
+            setTargetLang("en");
+        } else if (value === "englishToChamorro") {
+            setSourceLang("en");
+            setTargetLang("ch");
+        } else if (value === "chamorroToEnglish") {
+            setSourceLang("ch");
             setTargetLang("en");
         }
     }
@@ -100,8 +105,8 @@ export default function Translate() {
         document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
         disableFeedbackButtons();
         setClipboardBtnText("Copy to Clipboard");
-        document.getElementById("btnUpvote")!.innerText = "👍 lelei";
-        document.getElementById("btnDownvote")!.innerText = "👎 leaga";
+        document.getElementById("btnUpvote")!.innerText = "👍";
+        document.getElementById("btnDownvote")!.innerText = "👎";
     };
 
     const handleClippy = (value: string) => {
@@ -125,7 +130,7 @@ export default function Translate() {
     const handleUpvote = () => {
         console.log("upvote clicked");
         //change the text of the feedback button
-        document.getElementById("btnUpvote")!.innerText = "👎 leaga ☑️";
+        document.getElementById("btnUpvote")!.innerText = "👍 ☑️";
         //disable the feedback buttons
         disableFeedbackButtons();
         //update the translation record with the feedback
@@ -136,7 +141,7 @@ export default function Translate() {
     const handleDownvote = async () => {
         console.log("downvote clicked");
         //change the text of the feedback button
-        document.getElementById("btnDownvote")!.innerText = "👎 leaga ☑️";
+        document.getElementById("btnDownvote")!.innerText = "👎 ☑️";
         //disable the feedback buttons
         disableFeedbackButtons();
         //update the translation record with the feedback
@@ -221,18 +226,13 @@ export default function Translate() {
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
                             <div className="grid grid-cols-3">
                                 <div className="col-span-2 ">
-                                    <div>
-                                        <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                            <input type="radio" defaultChecked id="translate-mode-1" name="translate-mode" value="toSamoan"
-                                                onChange={(e) => updateTranslateMode(e.target.value)} />
-                                            <label htmlFor="translate-mode-1" className="ml-3 text-gray-700 dark:text-gray-300">English to Samoan</label>
-                                        </div>
-                                        <div className="flex items-center pl-4 border border-gray-200 rounded dark:border-gray-700">
-                                            <input type="radio" id="translate-mode-2" name="translate-mode" value="toEnglish"
-                                                onChange={(e) => updateTranslateMode(e.target.value)} />
-                                            <label htmlFor="translate-mode-2" className="ml-3 text-gray-700 dark:text-gray-300">Samoan to English</label>
-                                        </div>
-                                    </div>
+                                   {/* Select with four options for English to Chamorro or to Samoan or vice versa */}
+                                    <select className="form-select control-strip-item" id="translateModeSelector" onChange={(e) => updateTranslateMode(e.target.value)}>
+                                        <option value="englishToSamoan">English to Samoan</option>
+                                        <option value="samoanToEnglish">Samoan to English</option>
+                                        <option value="englishToChamorro">English to Chamorro</option>
+                                        <option value="chamorroToEnglish">Chamorro to English</option>
+                                    </select>
                                 </div>
                                 {/* // Here is the button to clear the text area. */}
                                 <div className="flex justify-end col-span-1 gap-1">
@@ -271,14 +271,14 @@ export default function Translate() {
                                     <button className="control-strip-item"
                                         disabled={upvoteDisabled}
                                         id="btnUpvote"
-                                        onClick={(e) => handleUpvote()}>👍 lelei</button>
+                                        onClick={(e) => handleUpvote()}>👍</button>
                                 </div>
                                 {/* // Here is the thumbs down button. */}
                                 <div>
                                     <button className="control-strip-item"
                                         disabled={downvoteDisabled}
                                         id="btnDownvote"
-                                        onClick={(e) => handleDownvote()}>👎 leaga</button>
+                                        onClick={(e) => handleDownvote()}>👎</button>
                                 </div>
                             </div>
                         </div>

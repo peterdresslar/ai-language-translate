@@ -11,7 +11,6 @@ import { ReplicateStream, StreamingTextResponse } from 'ai';
 
 
 import type { ModelConfig } from '../../ModelConfig';
-import { text } from 'stream/consumers';
 
 export const runtime = 'edge';
 
@@ -52,11 +51,14 @@ export async function POST(req: Request) {
       // else if one of the two OpenAI modelconfigs
     } else if (modelConfig.modelName === 'gpt-4' || modelConfig.modelName === 'gpt-3.5-turbo') {
       console.log("modelConfig is defined with name " + modelConfig.modelName);
-      const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan'; //yes, there are more sophisticated ways to do this
-      const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
+      // set input language and output language from our translateMode. translateMode can be one of four options: englishToSamoan, samoanToEnglish, chamorroToEnglish, englishToChamorro
+      // can split the string on "To" and then use the first and second parts to set the input and output languages
+      const inputLang = translateMode.split("To")[0];
+      const outputLang = translateMode.split("To")[1];
+
       const prompt = ChatPromptTemplate.fromPromptMessages([
         SystemMessagePromptTemplate.fromTemplate(
-          "You are a language translator that translates '{input_language}' to '{output_language}' as precisely as possible."
+          "You are a language translator that translates {input_language} to {output_language} as precisely as possible. Even though you do not know Samoan or Chamorro very well, you do your best when one of these is a target language. Please only respond with the translated text. No commentary is requested or desired. Thank you."
         ),
         HumanMessagePromptTemplate.fromTemplate('{text}'),
       ]);
@@ -107,7 +109,7 @@ export async function POST(req: Request) {
       console.log("modelConfig is defined with name " + modelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan';
       const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
-      const systemPrompt = "You are a professional translator. You always translate " + inputLang + " to " + outputLang + ". Even if you are not comfortable with your Samoan Langugae skills, you do your very best. Please only respond with the translated text. No commentary is requested or desired. Thank you.";
+      const systemPrompt = "You are a professional translator. You always translate " + inputLang + " to " + outputLang + ". Even if you are not comfortable with your Samoan or Chamorro language skills, you do your very best. Please only respond with the translated text. No commentary is requested or desired. Thank you.";
 
       // Ask Replicate for a streaming chat completion given the prompt
       const prediction = await replicate.predictions.create({

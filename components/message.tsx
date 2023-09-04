@@ -14,6 +14,12 @@ export default function Message({
                 </div>
             )}
 
+            {props.moreMessage && (
+                <div className="text-sm text-indigo-600">
+                    {props.moreMessage}
+                </div>
+            )}
+
             {props.translated && (
                 <div className="text-sm italic text-indigo-600">
                     {props.translated}
