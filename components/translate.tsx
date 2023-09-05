@@ -25,7 +25,7 @@ export default function Translate() {
         { idx: 2, value: 'englishToChamorro', label: 'English to Chamorro' },
         { idx: 3, value: 'chamorroToEnglish', label: 'Chamorro to English' }
     ];
-    const [translateMode, setTranslatemode] = useState(translateOptions[0].value); 
+    const [translateMode, setTranslatemode] = useState(""); 
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
     const [downvoteDisabled, setDownvoteDisabled] = useState(true);
     const [sourceLang, setSourceLang] = useState("en");
@@ -207,7 +207,7 @@ export default function Translate() {
 
             try {
                 console.log('streaming');
-                console.log('modelConfigId: ' + modelConfigId);
+                console.log('modelConfigId: ' + modelConfigId + ' translateMode: ' + translateMode);
                 if (modelConfigId != 3) {
                     //determine which translateMode we are in by reading the radio button value
                     await fetchEventSource('/api/translate', {
@@ -274,7 +274,6 @@ export default function Translate() {
                             <div className="grid grid-cols-3">
                                 <div className="col-span-2 ">
                                     <Select
-                                        id="langSelector"
                                         theme={(theme) => ({
                                             ...theme,
                                             borderRadius: 0,
@@ -287,7 +286,8 @@ export default function Translate() {
                                         classNamePrefix="react-select-translate"
                                         placeholder="Select languages for translation"
                                         options={translateOptions}
-                                        onChange={updateTranslateMode}
+                                        // defaultValue={translateOptions[0]}
+                                        onChange={(e) => updateTranslateMode(e)}
                                     />
 
                                 </div>
