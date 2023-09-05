@@ -12,18 +12,23 @@ const dbClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_PRIVATE_KEY
 );
 
-type TranslateOption = {
-    readonly idx: number;
+type Option = {
+    readonly idx?: number;
     readonly value: string;
     readonly label: string;
 }
 
 export default function Translate() {
-    const translateOptions: TranslateOption[] = [
+    const translateOptions: Option[] = [
         { idx: 0, value: 'englishToSamoan', label: 'English to Samoan' },
         { idx: 1, value: 'samoanToEnglish', label: 'Samoan to English' },
         { idx: 2, value: 'englishToChamorro', label: 'English to Chamorro' },
         { idx: 3, value: 'chamorroToEnglish', label: 'Chamorro to English' }
+    ];
+    const modelOptions: Option[] = [
+        { idx: 0, value: 'gpt4', label: 'OpenAI GPT-4' },
+        { idx: 1, value: 'gpt35', label: 'OpenAI GPT-3.5' },
+        { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
     ];
     const [translateMode, setTranslatemode] = useState(""); 
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
@@ -32,7 +37,7 @@ export default function Translate() {
     const [targetLang, setTargetLang] = useState("sm");
     const [input, setInput] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
-    const [modelConfigId, setModelConfigId] = useState(1);
+    const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx);
     const [userId, setUserId] = useState(1); // later we can add users
 
     const [inflight, setInflight] = useState(false);
@@ -83,7 +88,7 @@ export default function Translate() {
         }
     }
 
-    const updateTranslateMode = (option: TranslateOption | null) => {
+    const updateTranslateMode = (option: Option | null) => {
         if (option) {
             console.log("updateTranslateMode called with " + option.value);
             setTranslatemode(option.value);
@@ -105,6 +110,13 @@ export default function Translate() {
                 document.getElementById("btnSubmit")!.removeAttribute("disabled");
             }
         } //ending the if (option) statement
+    }
+
+    const handleModelConfigChange = (option: Option | null) => {
+        if (option) {
+            console.log("handleModelConfigChange called with " + option.value);
+            setModelConfigId(option.idx);
+        }
     }
 
     const handleInputChange = (value: string) => {
@@ -146,13 +158,13 @@ export default function Translate() {
         }
     };
 
-    const disableLanguageSelect = (disable: boolean) => {
-        if (disable) {
-            document.getElementById("modelSelector")!.setAttribute("disabled", "true");
-        } else {
-            document.getElementById("modelSelector")!.removeAttribute("disabled");
-        }
-    };
+    // const disableLanguageSelect = (disable: boolean) => {
+    //     if (disable) {
+    //         document.getElementById("languageSelector")!.setAttribute("disabled", "true");
+    //     } else {
+    //         document.getElementById("languageSelector")!.removeAttribute("disabled");
+    //     }
+    // };
 
     const enableFeedbackButtons = () => {
         //enable the feedback buttons
@@ -203,7 +215,7 @@ export default function Translate() {
             disableFeedbackButtons();
             setClipboardBtnText("Copy to Clipboard");
             disableSubmitButton(true);
-            disableLanguageSelect(true);
+        //    disableLanguageSelect(true);
 
             try {
                 console.log('streaming');
@@ -254,7 +266,7 @@ export default function Translate() {
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
-                disableLanguageSelect(false);
+            //    disableLanguageSelect(false);
                 disableSubmitButton(false);
             }
         },
@@ -356,11 +368,21 @@ export default function Translate() {
                     <div className="row md:flex md:items-center gap-10 justify-center">
                         <div className="md:w-1/2">
                             {/* model selector dropdown with the two hardcoded options for now */}
-                            <select className="form-select text-sm control-strip-item" id="modelSelector" onChange={(e) => setModelConfigId(Number(e.target.value))}>
-                                <option value="1">OpenAI GPT-4</option>
-                                <option value="2">OpenAI GPT-3.5</option>
-                                <option value="3">Meta Llama 2 70B (fa'atamala/slow)</option>
-                            </select>
+                            <Select
+                                        theme={(theme) => ({
+                                            ...theme,
+                                            borderRadius: 0,
+                                            colors: {
+                                                ...theme.colors,
+                                                primary25: '#93c5fd',
+                                                primary: '#3b82f6',
+                                            },
+                                        })}
+                                        classNamePrefix="react-select-model"
+                                        options={modelOptions}
+                                        defaultValue={modelOptions[0]}
+                                        onChange={(e) => handleModelConfigChange(e)}
+                                    />
                         </div>
                         <div className="md:w-1/2">
                             <pre className="text-sm">Application version 0.0.1</pre>
