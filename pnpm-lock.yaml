@@ -77,9 +77,6 @@ dependencies:
   react-select:
     specifier: ^5.7.4
     version: 5.7.4(@types/react@18.2.5)(react-dom@18.2.0)(react@18.2.0)
-  react-tailwindcss-select:
-    specifier: ^1.8.5
-    version: 1.8.5(react@18.2.0)
   replicate:
     specifier: ^0.16.1
     version: 0.16.1
@@ -3506,14 +3503,6 @@ packages:
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.5)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
-    dev: false
-
-  /react-tailwindcss-select@1.8.5(react@18.2.0):
-    resolution: {integrity: sha512-x29IrLiqBT5FnkC9oFQReOr05tEOZHtDtZdha84nlSWcj3qD67yonKFHXIf69yc8ElFlKUxCEv0zCllN8jHBFA==}
-    peerDependencies:
-      react: ^18.2.0
-    dependencies:
-      react: 18.2.0
     dev: false
 
   /react-transition-group@4.4.5(react-dom@18.2.0)(react@18.2.0):
