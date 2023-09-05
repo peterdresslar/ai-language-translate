@@ -1,8 +1,9 @@
 'use client';
 import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import Select from "react-select";
 
 export const runtime = 'edge';
 
@@ -11,8 +12,20 @@ const dbClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_PRIVATE_KEY
 );
 
+type TranslateOption = {
+    readonly idx: number;
+    readonly value: string;
+    readonly label: string;
+}
+
 export default function Translate() {
-    const [translateMode, setTranslateMode] = useState("englishToSamoan");
+    const translateOptions: TranslateOption[] = [
+        { idx: 0, value: 'englishToSamoan', label: 'English to Samoan' },
+        { idx: 1, value: 'samoanToEnglish', label: 'Samoan to English' },
+        { idx: 2, value: 'englishToChamorro', label: 'English to Chamorro' },
+        { idx: 3, value: 'chamorroToEnglish', label: 'Chamorro to English' }
+    ];
+    const [translateMode, setTranslatemode] = useState(translateOptions[0].value); 
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
     const [downvoteDisabled, setDownvoteDisabled] = useState(true);
     const [sourceLang, setSourceLang] = useState("en");
@@ -70,27 +83,34 @@ export default function Translate() {
         }
     }
 
-    const updateTranslateMode = (value: string) => {
-        setTranslateMode(value);
-        if (value === "englishToSamoan") {
-            setSourceLang("en");
-            setTargetLang("sm");
-        } else if (value === "samoanToEnglish") {
-            setSourceLang("sm");
-            setTargetLang("en");
-        } else if (value === "englishToChamorro") {
-            setSourceLang("en");
-            setTargetLang("ch");
-        } else if (value === "chamorroToEnglish") {
-            setSourceLang("ch");
-            setTargetLang("en");
-        }
+    const updateTranslateMode = (option: TranslateOption | null) => {
+        if (option) {
+            console.log("updateTranslateMode called with " + option.value);
+            setTranslatemode(option.value);
+            if (option.value === "englishToSamoan") {
+                setSourceLang("en");
+                setTargetLang("sm");
+            } else if (option.value === "samoanToEnglish") {
+                setSourceLang("sm");
+                setTargetLang("en");
+            } else if (option.value === "englishToChamorro") {
+                setSourceLang("en");
+                setTargetLang("ch");
+            } else if (option.value === "chamorroToEnglish") {
+                setSourceLang("ch");
+                setTargetLang("en");
+            }
+            // if the input is not empty, enable the submit button
+            if (input.length > 0) {
+                document.getElementById("btnSubmit")!.removeAttribute("disabled");
+            }
+        } //ending the if (option) statement
     }
 
     const handleInputChange = (value: string) => {
         setInput(value);
-        //enable btnSubmit if input is not empty
-        if (value.length > 0) {
+        //enable btnSubmit if input is not empty and a language has been selected
+        if (value.length > 0 && translateMode.length > 0) {
             document.getElementById("btnSubmit")!.removeAttribute("disabled");
         } else {
             document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
@@ -100,19 +120,38 @@ export default function Translate() {
 
     const handleClear = () => {
         setInput("");
-        setResults("");
+        setResults("Results will appear here.");
         setTransactionId("");
-        document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+        disableSubmitButton(true);
         disableFeedbackButtons();
         setClipboardBtnText("Copy to Clipboard");
         document.getElementById("btnUpvote")!.innerText = "👍";
         document.getElementById("btnDownvote")!.innerText = "👎";
+        // debugging select:
+        console.log("translateMode is now " + translateMode);
+        console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
     };
 
     const handleClippy = (value: string) => {
         navigator.clipboard.writeText(value);
         //write a clipboard icon to the clipboard button text
         setClipboardBtnText("Copied. 📋");
+    };
+
+    const disableSubmitButton = (disable: boolean) => {
+        if (disable) {
+            document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+        } else {
+            document.getElementById("btnSubmit")!.removeAttribute("disabled");
+        }
+    };
+
+    const disableLanguageSelect = (disable: boolean) => {
+        if (disable) {
+            document.getElementById("modelSelector")!.setAttribute("disabled", "true");
+        } else {
+            document.getElementById("modelSelector")!.removeAttribute("disabled");
+        }
     };
 
     const enableFeedbackButtons = () => {
@@ -159,6 +198,12 @@ export default function Translate() {
             // Reset results
             setInflight(true);
             setResults("");
+
+            // Handle inflght-ness
+            disableFeedbackButtons();
+            setClipboardBtnText("Copy to Clipboard");
+            disableSubmitButton(true);
+            disableLanguageSelect(true);
 
             try {
                 console.log('streaming');
@@ -209,6 +254,8 @@ export default function Translate() {
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
+                disableLanguageSelect(false);
+                disableSubmitButton(false);
             }
         },
         [input, inflight]
@@ -226,13 +273,23 @@ export default function Translate() {
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
                             <div className="grid grid-cols-3">
                                 <div className="col-span-2 ">
-                                   {/* Select with four options for English to Chamorro or to Samoan or vice versa */}
-                                    <select className="form-select control-strip-item" id="translateModeSelector" onChange={(e) => updateTranslateMode(e.target.value)}>
-                                        <option value="englishToSamoan">English to Samoan</option>
-                                        <option value="samoanToEnglish">Samoan to English</option>
-                                        <option value="englishToChamorro">English to Chamorro</option>
-                                        <option value="chamorroToEnglish">Chamorro to English</option>
-                                    </select>
+                                    <Select
+                                        id="langSelector"
+                                        theme={(theme) => ({
+                                            ...theme,
+                                            borderRadius: 0,
+                                            colors: {
+                                                ...theme.colors,
+                                                primary25: '#93c5fd',
+                                                primary: '#3b82f6',
+                                            },
+                                        })}
+                                        classNamePrefix="react-select-translate"
+                                        placeholder="Select languages for translation"
+                                        options={translateOptions}
+                                        onChange={updateTranslateMode}
+                                    />
+
                                 </div>
                                 {/* // Here is the button to clear the text area. */}
                                 <div className="flex justify-end col-span-1 gap-1">
@@ -290,7 +347,7 @@ export default function Translate() {
                 </div>
             </div>
             {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
-            <hr className="mt-10"></hr>
+            <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
             <div className="technical-options flex justify-center mt-5">
                 <div className="grid grid-rows-2">
                     <div className="row flex justify-center">
@@ -311,6 +368,7 @@ export default function Translate() {
                     </div>
                 </div>
             </div>
+            <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
         </Container>
     );
 }
