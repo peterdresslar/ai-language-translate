@@ -283,8 +283,8 @@ export default function Translate() {
                     <form onSubmit={submitHandler}>
                         <div className="control-strip">
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
-                            <div className="grid grid-cols-3">
-                                <div className="col-span-2 ">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="mb-4 lg:mb-0 col-span-1 lg:col-span-2 ">
                                     <Select
                                         theme={(theme) => ({
                                             ...theme,
