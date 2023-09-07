@@ -18,12 +18,12 @@ export const runtime = 'edge';
 async function resolveModelConfig(modelConfigId: number) {
   let c;
   try {
-    if (modelConfigId == 2) {
-      c = '{"modelConfigId": 2, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    } else if (modelConfigId == 3) { // LLama/Replicate
-      c = '{"modelConfigId": 3, "configName": "LLama-Replicate default settings", "modelName": "Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    if (modelConfigId == 1) {
+      c = '{"modelConfigId": 1, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+    } else if (modelConfigId == 2) { // LLama/Replicate
+      c = '{"modelConfigId": 2, "configName": "LLama-Replicate default settings", "modelName": "Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     } else { // default to GPT-4
-      c = '{"modelConfigId": 1, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
+      c = '{"modelConfigId": 0, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
     }
     const mC: ModelConfig = JSON.parse(c);
     return mC;
