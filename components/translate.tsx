@@ -30,7 +30,7 @@ export default function Translate() {
         { idx: 1, value: 'gpt35', label: 'OpenAI GPT-3.5' },
         { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
     ];
-    const [translateMode, setTranslatemode] = useState(""); 
+    const [translateMode, setTranslateMode] = useState(""); 
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
     const [downvoteDisabled, setDownvoteDisabled] = useState(true);
     const [sourceLang, setSourceLang] = useState("en");
@@ -91,17 +91,17 @@ export default function Translate() {
     const updateTranslateMode = (option: Option | null) => {
         if (option) {
             console.log("updateTranslateMode called with " + option.value);
-            setTranslatemode(option.value);
-            if (option.value === "englishToSamoan") {
+            setTranslateMode(option.value);
+            if (option.value == "englishToSamoan") {
                 setSourceLang("en");
                 setTargetLang("sm");
-            } else if (option.value === "samoanToEnglish") {
+            } else if (option.value == "samoanToEnglish") {
                 setSourceLang("sm");
                 setTargetLang("en");
-            } else if (option.value === "englishToChamorro") {
+            } else if (option.value == "englishToChamorro") {
                 setSourceLang("en");
                 setTargetLang("ch");
-            } else if (option.value === "chamorroToEnglish") {
+            } else if (option.value == "chamorroToEnglish") {
                 setSourceLang("ch");
                 setTargetLang("en");
             }
@@ -110,12 +110,19 @@ export default function Translate() {
                 document.getElementById("btnSubmit")!.removeAttribute("disabled");
             }
         } //ending the if (option) statement
+     
+            console.log("translateMode is now " + translateMode);
+            console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
+            console.log("modelConfigId is now " + modelConfigId);
     }
 
     const handleModelConfigChange = (option: Option | null) => {
         if (option) {
             console.log("handleModelConfigChange called with " + option.value);
             setModelConfigId(option.idx);
+            console.log("translateMode is now " + translateMode);
+            console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
+            console.log("modelConfigId is now " + modelConfigId);
         }
     }
 
@@ -142,6 +149,7 @@ export default function Translate() {
         // debugging select:
         console.log("translateMode is now " + translateMode);
         console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
+        console.log("modelConfigId is now " + modelConfigId);
     };
 
     const handleClippy = (value: string) => {
@@ -220,7 +228,7 @@ export default function Translate() {
             try {
                 console.log('streaming');
                 console.log('modelConfigId: ' + modelConfigId + ' translateMode: ' + translateMode);
-                if (modelConfigId != 3) {
+                if (modelConfigId != 2) {
                     //determine which translateMode we are in by reading the radio button value
                     await fetchEventSource('/api/translate', {
                         method: 'POST',
@@ -231,10 +239,6 @@ export default function Translate() {
                         }
                     });
                 } else { // special processing for llama 2 70B model for now
-                    console.log('streaming llama 2 70B');
-
-                    // here we will fetch from /api/translate, which will return a Response with a streaming text body. we will write the stream to console and also use the stream to update our results text area.
-
                     const response = await fetch('/api/translate', {
                         method: 'POST',
                         body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
@@ -249,10 +253,8 @@ export default function Translate() {
                             break;
                         }
                         resultsText += decoder.decode(value);
-                        console.log(decoder.decode(value));
                     }
                     setResults(resultsText);
-                    console.log('streaming llama 2 70B complete');
                 }
                 // get the inner text of the resultsTextArea and write it to the database.
                 //note that there should be a better stateful way to do this.
