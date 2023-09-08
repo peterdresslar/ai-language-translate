@@ -115,10 +115,6 @@ export default function Translate() {
                 document.getElementById("btnSubmit")!.removeAttribute("disabled");
             }
         } //ending the if (option) statement
-
-        console.log("translateMode is now " + translateMode);
-        console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
-        console.log("modelConfigId is now " + modelConfigId);
     }
 
     const handleModelConfigChange = (option: Option | null) => {
@@ -271,7 +267,7 @@ export default function Translate() {
                 disableSubmitButton(false);
             }
         },
-        [input, inflight]
+        [input, inflight, modelConfigId, translateMode]
     );
 
     return (
@@ -390,9 +386,9 @@ export default function Translate() {
                                 <pre className="text-sm">Application version 0.0.1</pre>
                             </div>
                         </div>
-                        <div className="row flex justify-center">
+                        {/* <div className="row flex justify-center" >
                             <span className="text-sm">Model Config: {modelConfigId} Translate Mode: {translateMode} </span>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
