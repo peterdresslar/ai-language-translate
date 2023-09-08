@@ -30,14 +30,12 @@ export default function Translate() {
         { idx: 1, value: 'gpt35', label: 'OpenAI GPT-3.5' },
         { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
     ];
-    const [translateMode, setTranslateMode] = useState(""); 
+    const [translateMode, setTranslateMode] = useState("");
     const [upvoteDisabled, setUpvoteDisabled] = useState(true);
     const [downvoteDisabled, setDownvoteDisabled] = useState(true);
-    const [sourceLang, setSourceLang] = useState("en");
-    const [targetLang, setTargetLang] = useState("sm");
     const [input, setInput] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
-    const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx);
+    const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx); //default to the first model in the list
     const [userId, setUserId] = useState(1); // later we can add users
 
     const [inflight, setInflight] = useState(false);
@@ -48,6 +46,8 @@ export default function Translate() {
     // returns the transactionId
     const writeTranslationToDb = async (resultsText: String) => {
         let transactionId = "";
+        let sourceLang = getInputLangFromTranslateMode();
+        let targetLang = getOutputLangFromTranslateMode();
         console.log("writing to db for sourcelang " + sourceLang + " and targetlang " + targetLang);
         try {
             let { data, error } = await dbClient
@@ -88,41 +88,43 @@ export default function Translate() {
         }
     }
 
+    const getInputLangFromTranslateMode = () => {
+        //if empty or null return empty string
+        if (translateMode.length == 0) { 
+            return "";
+        }
+        //just split on the To and take the first part
+        return translateMode.split("To")[0];
+    }
+
+    const getOutputLangFromTranslateMode = () => {
+        //if empty or null return empty string
+        if (translateMode.length == 0) {
+            return "";
+        }
+        //just split on the To and take the second part
+        return translateMode.split("To")[1];
+    } 
+
     const updateTranslateMode = (option: Option | null) => {
         if (option) {
             console.log("updateTranslateMode called with " + option.value);
             setTranslateMode(option.value);
-            if (option.value == "englishToSamoan") {
-                setSourceLang("en");
-                setTargetLang("sm");
-            } else if (option.value == "samoanToEnglish") {
-                setSourceLang("sm");
-                setTargetLang("en");
-            } else if (option.value == "englishToChamorro") {
-                setSourceLang("en");
-                setTargetLang("ch");
-            } else if (option.value == "chamorroToEnglish") {
-                setSourceLang("ch");
-                setTargetLang("en");
-            }
             // if the input is not empty, enable the submit button
             if (input.length > 0) {
                 document.getElementById("btnSubmit")!.removeAttribute("disabled");
             }
         } //ending the if (option) statement
-     
-            console.log("translateMode is now " + translateMode);
-            console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
-            console.log("modelConfigId is now " + modelConfigId);
+
+        console.log("translateMode is now " + translateMode);
+        console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
+        console.log("modelConfigId is now " + modelConfigId);
     }
 
     const handleModelConfigChange = (option: Option | null) => {
         if (option) {
             console.log("handleModelConfigChange called with " + option.value);
             setModelConfigId(option.idx);
-            console.log("translateMode is now " + translateMode);
-            console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
-            console.log("modelConfigId is now " + modelConfigId);
         }
     }
 
@@ -146,10 +148,6 @@ export default function Translate() {
         setClipboardBtnText("Copy to Clipboard");
         document.getElementById("btnUpvote")!.innerText = "👍";
         document.getElementById("btnDownvote")!.innerText = "👎";
-        // debugging select:
-        console.log("translateMode is now " + translateMode);
-        console.log("sourceLang is now " + sourceLang + " and targetLang is now " + targetLang);
-        console.log("modelConfigId is now " + modelConfigId);
     };
 
     const handleClippy = (value: string) => {
@@ -209,6 +207,7 @@ export default function Translate() {
 
     const submitHandler = useCallback(
         async (e: FormEvent) => {
+            console.log('modelConfigId: ' + modelConfigId + ' translateMode: ' + translateMode);
             e.preventDefault();
             console.log('in event');
 
@@ -223,11 +222,11 @@ export default function Translate() {
             disableFeedbackButtons();
             setClipboardBtnText("Copy to Clipboard");
             disableSubmitButton(true);
-        //    disableLanguageSelect(true);
+            //    disableLanguageSelect(true);
 
             try {
                 console.log('streaming');
-                console.log('modelConfigId: ' + modelConfigId + ' translateMode: ' + translateMode);
+
                 if (modelConfigId != 2) {
                     //determine which translateMode we are in by reading the radio button value
                     await fetchEventSource('/api/translate', {
@@ -268,7 +267,7 @@ export default function Translate() {
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
-            //    disableLanguageSelect(false);
+                //    disableLanguageSelect(false);
                 disableSubmitButton(false);
             }
         },
@@ -277,12 +276,14 @@ export default function Translate() {
 
     return (
         <Container className="mb-20">
-            {/* Row for all of the controls and operations */}
-            <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">
-                {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
-                <div className="translate-pane-left">
-                    {/* Here is the control strip */}
-                    <form onSubmit={submitHandler}>
+            <form onSubmit={submitHandler}>
+
+                {/* Row for all of the controls and operations */}
+                <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">
+                    {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
+
+                    <div className="translate-pane-left">
+                        {/* Here is the control strip */}
                         <div className="control-strip">
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -323,76 +324,79 @@ export default function Translate() {
                                 onChange={(e) => handleInputChange(e.target.value)}>
                             </textarea>
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
-                <div className="translate-pane-right">
-                    {/* // Here is the control strip */}
-                    <div className="control-strip">
-                        <div className="grid grid-cols-3">
-                            {/* // Here is the button to copy the results pane to the clipboard. */}
-                            <div className="col-span-2 ">
-                                <button className="control-strip-item" id="btnCopy"
-                                    onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
-                            </div>
-                            {/* // Here is the thumbs up button. */}
-                            <div className="flex justify-end col-span-1 gap-1">
-                                <div>
-                                    <button className="control-strip-item"
-                                        disabled={upvoteDisabled}
-                                        id="btnUpvote"
-                                        onClick={(e) => handleUpvote()}>👍</button>
+                    {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
+                    <div className="translate-pane-right">
+                        {/* // Here is the control strip */}
+                        <div className="control-strip">
+                            <div className="grid grid-cols-3">
+                                {/* // Here is the button to copy the results pane to the clipboard. */}
+                                <div className="col-span-2 ">
+                                    <button className="control-strip-item" id="btnCopy"
+                                        onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
                                 </div>
-                                {/* // Here is the thumbs down button. */}
-                                <div>
-                                    <button className="control-strip-item"
-                                        disabled={downvoteDisabled}
-                                        id="btnDownvote"
-                                        onClick={(e) => handleDownvote()}>👎</button>
+                                {/* // Here is the thumbs up button. */}
+                                <div className="flex justify-end col-span-1 gap-1">
+                                    <div>
+                                        <button className="control-strip-item"
+                                            disabled={upvoteDisabled}
+                                            id="btnUpvote"
+                                            onClick={(e) => handleUpvote()}>👍</button>
+                                    </div>
+                                    {/* // Here is the thumbs down button. */}
+                                    <div>
+                                        <button className="control-strip-item"
+                                            disabled={downvoteDisabled}
+                                            id="btnDownvote"
+                                            onClick={(e) => handleDownvote()}>👎</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
-                    <div className="results-container">
-                        <pre id="resultsTextArea" className="results-text-area">{results}</pre>
-                    </div>
-                </div>
-            </div>
-            {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
-            <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
-            <div className="technical-options flex justify-center mt-5">
-                <div className="grid grid-rows-2">
-                    <div className="row flex justify-center">
-                        <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
-                    </div>
-                    <div className="row md:flex md:items-center gap-10 justify-center">
-                        <div className="md:w-1/2">
-                            {/* model selector dropdown with the two hardcoded options for now */}
-                            <Select
-                                        theme={(theme) => ({
-                                            ...theme,
-                                            borderRadius: 0,
-                                            colors: {
-                                                ...theme.colors,
-                                                primary25: '#93c5fd',
-                                                primary: '#3b82f6',
-                                            },
-                                        })}
-                                        classNamePrefix="react-select-model"
-                                        options={modelOptions}
-                                        defaultValue={modelOptions[0]}
-                                        onChange={(e) => handleModelConfigChange(e)}
-                                    />
-                        </div>
-                        <div className="md:w-1/2">
-                            <pre className="text-sm">Application version 0.0.1</pre>
+                        {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
+                        <div className="results-container">
+                            <pre id="resultsTextArea" className="results-text-area">{results}</pre>
                         </div>
                     </div>
                 </div>
-            </div>
-            <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
+                {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
+                <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
+                <div className="technical-options flex justify-center mt-5">
+                    <div className="grid grid-rows-2">
+                        <div className="row flex justify-center">
+                            <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
+                        </div>
+                        <div className="row md:flex md:items-center gap-10 justify-center">
+                            <div className="md:w-1/2">
+                                {/* model selector dropdown with the two hardcoded options for now */}
+                                <Select
+                                    theme={(theme) => ({
+                                        ...theme,
+                                        borderRadius: 0,
+                                        colors: {
+                                            ...theme.colors,
+                                            primary25: '#93c5fd',
+                                            primary: '#3b82f6',
+                                        },
+                                    })}
+                                    classNamePrefix="react-select-model"
+                                    options={modelOptions}
+                                    defaultValue={modelOptions[0]}
+                                    onChange={(e) => handleModelConfigChange(e)}
+                                />
+                            </div>
+                            <div className="md:w-1/2">
+                                <pre className="text-sm">Application version 0.0.1</pre>
+                            </div>
+                        </div>
+                        <div className="row flex justify-center">
+                            <span className="text-sm">Model Config: {modelConfigId} Translate Mode: {translateMode} </span>
+                        </div>
+                    </div>
+                </div>
+                <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
+            </form>
         </Container>
     );
 }
