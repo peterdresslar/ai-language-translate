@@ -153,7 +153,8 @@ export default function Translate() {
         setInput("");
         setResults("Results will appear here.");
         setTransactionId("");
-        disableSubmitButton(true);
+        setSubmitBtnEnabled(false);
+        setSubmitBtnVisible(false);
         setFeedbackEnabled(false);
         setClipboardBtnText("Copy to Clipboard");
     };
