@@ -156,6 +156,7 @@ export default function Translate() {
         setSubmitBtnEnabled(false);
         setSubmitBtnVisible(false);
         setFeedbackEnabled(false);
+        setSelectedVote(null);
         setClipboardBtnText("Copy to Clipboard");
     };
 
