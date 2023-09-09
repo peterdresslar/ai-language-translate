@@ -1,7 +1,7 @@
 'use client';
 import Container from "./container";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { FormEvent, useCallback, useState } from 'react';
+import { FormEvent, useCallback, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
 
@@ -31,16 +31,25 @@ export default function Translate() {
         { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
     ];
     const [translateMode, setTranslateMode] = useState("");
-    const [upvoteDisabled, setUpvoteDisabled] = useState(true);
-    const [downvoteDisabled, setDownvoteDisabled] = useState(true);
+    const [feedbackEnabled, setFeedbackEnabled] = useState(false);
+    const [selectedVote, setSelectedVote] = useState<'upvote' | 'downvote' | null>(null);
+
     const [input, setInput] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
     const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx); //default to the first model in the list
     const [userId, setUserId] = useState(1); // later we can add users
 
     const [inflight, setInflight] = useState(false);
+    const [submitBtnVisible, setSubmitBtnVisible] = useState(false);
+    const [submitBtnEnabled, setSubmitBtnEnabled] = useState(false);
+    const [submitBtnText, setSubmitBtnText] = useState("Translate");
     const [results, setResults] = useState("Results will appear here.");
     const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
+
+    //useeffect to log states of submit button variables to the console
+    useEffect(() => {
+        console.log('submitBtnVisible: ' + submitBtnVisible + ' submitBtnEnabled: ' + submitBtnEnabled + ' submitBtnText: ' + submitBtnText);
+    }, [submitBtnVisible, submitBtnEnabled, submitBtnText]);
 
     // Eventually should move this to a route  
     // returns the transactionId
@@ -90,7 +99,7 @@ export default function Translate() {
 
     const getInputLangFromTranslateMode = () => {
         //if empty or null return empty string
-        if (translateMode.length == 0) { 
+        if (translateMode.length == 0) {
             return "";
         }
         //just split on the To and take the first part
@@ -104,7 +113,7 @@ export default function Translate() {
         }
         //just split on the To and take the second part
         return translateMode.split("To")[1];
-    } 
+    }
 
     const updateTranslateMode = (option: Option | null) => {
         if (option) {
@@ -112,7 +121,9 @@ export default function Translate() {
             setTranslateMode(option.value);
             // if the input is not empty, enable the submit button
             if (input.length > 0) {
-                document.getElementById("btnSubmit")!.removeAttribute("disabled");
+                setSubmitBtnEnabled(true);
+                setSubmitBtnVisible(true);
+                setSubmitBtnText("Translate");
             }
         } //ending the if (option) statement
     }
@@ -128,9 +139,12 @@ export default function Translate() {
         setInput(value);
         //enable btnSubmit if input is not empty and a language has been selected
         if (value.length > 0 && translateMode.length > 0) {
-            document.getElementById("btnSubmit")!.removeAttribute("disabled");
+            setSubmitBtnEnabled(true);
+            setSubmitBtnVisible(true);
+            setSubmitBtnText("Translate");
         } else {
-            document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
+            setSubmitBtnEnabled(false);
+            setSubmitBtnVisible(false);
         }
         //check if the btnSubmit is enabled
     };
@@ -140,24 +154,14 @@ export default function Translate() {
         setResults("Results will appear here.");
         setTransactionId("");
         disableSubmitButton(true);
-        disableFeedbackButtons();
+        setFeedbackEnabled(false);
         setClipboardBtnText("Copy to Clipboard");
-        document.getElementById("btnUpvote")!.innerText = "👍";
-        document.getElementById("btnDownvote")!.innerText = "👎";
     };
 
     const handleClippy = (value: string) => {
         navigator.clipboard.writeText(value);
         //write a clipboard icon to the clipboard button text
         setClipboardBtnText("Copied. 📋");
-    };
-
-    const disableSubmitButton = (disable: boolean) => {
-        if (disable) {
-            document.getElementById("btnSubmit")!.setAttribute("disabled", "true");
-        } else {
-            document.getElementById("btnSubmit")!.removeAttribute("disabled");
-        }
     };
 
     // const disableLanguageSelect = (disable: boolean) => {
@@ -168,35 +172,19 @@ export default function Translate() {
     //     }
     // };
 
-    const enableFeedbackButtons = () => {
-        //enable the feedback buttons
-        setUpvoteDisabled(false);
-        setDownvoteDisabled(false);
-    };
-
-    const disableFeedbackButtons = () => {
-        //disable the feedback buttons and clear out any checkmarks from the text
-        setUpvoteDisabled(true);
-        setDownvoteDisabled(true);
-    };
-
-    const handleUpvote = () => {
-        console.log("upvote clicked");
-        //change the text of the feedback button
-        document.getElementById("btnUpvote")!.innerText = "👍 ☑️";
+    const handleUpvote = async () => {
         //disable the feedback buttons
-        disableFeedbackButtons();
+        setSelectedVote('upvote');
+        setFeedbackEnabled(false);
         //update the translation record with the feedback
         updateTranslationWithFeedback("upvote", transactionId);
     }
 
 
     const handleDownvote = async () => {
-        console.log("downvote clicked");
         //change the text of the feedback button
-        document.getElementById("btnDownvote")!.innerText = "👎 ☑️";
-        //disable the feedback buttons
-        disableFeedbackButtons();
+        setSelectedVote('downvote');
+        setFeedbackEnabled(false);
         //update the translation record with the feedback
         updateTranslationWithFeedback("downvote", transactionId);
     };
@@ -212,12 +200,12 @@ export default function Translate() {
 
             // Reset results
             setInflight(true);
+            setSubmitBtnText("Processing..");
             setResults("");
 
             // Handle inflght-ness
-            disableFeedbackButtons();
             setClipboardBtnText("Copy to Clipboard");
-            disableSubmitButton(true);
+            setSubmitBtnEnabled(false);
             //    disableLanguageSelect(true);
 
             try {
@@ -257,17 +245,19 @@ export default function Translate() {
                 const tId = await writeTranslationToDb(resultsText);
                 console.log('transactionId: ' + tId);
                 setTransactionId(tId);
-                enableFeedbackButtons();
+                setSelectedVote(null); // clear the vote
+                setFeedbackEnabled(true);
             } catch (error) {
                 console.error(error);
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
+                setSubmitBtnText("Translate");
+                setSubmitBtnEnabled(true);
                 //    disableLanguageSelect(false);
-                disableSubmitButton(false);
             }
         },
-        [input, inflight, modelConfigId, translateMode]
+        [input, inflight, modelConfigId, translateMode, feedbackEnabled, selectedVote, clipboardBtnText, results, transactionId, submitBtnText, submitBtnVisible] //ending the useCallback statement
     );
 
     return (
@@ -283,7 +273,7 @@ export default function Translate() {
                         <div className="control-strip">
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                                <div className="mb-4 lg:mb-0 col-span-1 lg:col-span-2 ">
+                                <div className="lg:mb-0 col-span-1 lg:col-span-2 ">
                                     <Select
                                         theme={(theme) => ({
                                             ...theme,
@@ -295,7 +285,7 @@ export default function Translate() {
                                             },
                                         })}
                                         classNamePrefix="react-select-translate"
-                                        placeholder="Select languages for translation"
+                                        placeholder="To start, select languages here..."
                                         options={translateOptions}
                                         // defaultValue={translateOptions[0]}
                                         onChange={(e) => updateTranslateMode(e)}
@@ -303,22 +293,42 @@ export default function Translate() {
 
                                 </div>
                                 {/* // Here is the button to clear the text area. */}
-                                <div className="flex justify-end col-span-1 gap-1">
-                                    <div>
-                                        <button className="control-strip-item" id="btnClear" type="reset" onClick={handleClear}>Clear</button>
-                                    </div>
+                                <div className="mt-2 lg:mt-0 flex justify-end col-span-1 gap-1">
                                     {/* // Here is the button to submit the text area. */}
-                                    <div>
-                                        <button className="control-strip-item font-bold" id="btnSubmit" type="submit" disabled>Submit</button>
-                                    </div>
+                                    <button
+                                        className={`control-strip-item ${!submitBtnVisible ? 'hidden' : ''}`}
+                                        disabled={!submitBtnEnabled}
+                                        id="btnSubmit"
+                                        type="submit"
+                                    >
+                                        {submitBtnText}
+                                    </button>
                                 </div>
                             </div>
                         </div>
                         {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
-                        <div className="text-input-container">
+                        <div className="relative text-input-container">
                             <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."
                                 onChange={(e) => handleInputChange(e.target.value)}>
                             </textarea>
+                            <button
+                                className="absolute top-2 right-2 bg-transparent hover:bg-gray-200 p-2 rounded-md"
+                                id="btnClear"
+                                type="reset"
+                                onClick={handleClear}
+                            >
+                                <svg
+                                    className="h-5 w-5 text-gray-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
@@ -335,17 +345,42 @@ export default function Translate() {
                                 {/* // Here is the thumbs up button. */}
                                 <div className="flex justify-end col-span-1 gap-1">
                                     <div>
-                                        <button className="control-strip-item"
-                                            disabled={upvoteDisabled}
+                                        {/* Upvote Button */}
+                                        <button
+                                            className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'upvote') || (feedbackEnabled && selectedVote === 'downvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'upvote' ? 'bg-gray-200' : ''}`}
+                                            disabled={(!feedbackEnabled && selectedVote === 'upvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
+
                                             id="btnUpvote"
-                                            onClick={(e) => handleUpvote()}>👍</button>
-                                    </div>
-                                    {/* // Here is the thumbs down button. */}
-                                    <div>
-                                        <button className="control-strip-item"
-                                            disabled={downvoteDisabled}
+                                            onClick={handleUpvote}
+                                        >
+                                            <svg
+                                                className={`h-5 w-5 ${selectedVote === 'upvote' ? 'text-gray-500' : 'text-gray-700'}`}
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"
+                                                />                                            </svg>
+                                        </button>
+
+                                        {/* Downvote Button */}
+                                        <button
+                                            className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'downvote') || (feedbackEnabled && selectedVote === 'upvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'downvote' ? 'bg-gray-200' : ''}`}
+                                            disabled={(!feedbackEnabled && selectedVote === 'downvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
+
                                             id="btnDownvote"
-                                            onClick={(e) => handleDownvote()}>👎</button>
+                                            onClick={handleDownvote}
+                                        >
+                                            <svg
+                                                className={`h-5 w-5 ${selectedVote === 'downvote' ? 'text-gray-500' : 'text-gray-700'}`}
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -386,9 +421,6 @@ export default function Translate() {
                                 <pre className="text-sm">Application version 0.0.1</pre>
                             </div>
                         </div>
-                        {/* <div className="row flex justify-center" >
-                            <span className="text-sm">Model Config: {modelConfigId} Translate Mode: {translateMode} </span>
-                        </div> */}
                     </div>
                 </div>
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
