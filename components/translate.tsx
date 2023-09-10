@@ -204,6 +204,8 @@ export default function Translate() {
         setFeedbackEnabled(false);
     };
 
+    let firstMessage = false; //just a flag to announce to us that we have to scroll down.
+
     const submitHandler = useCallback(
         async (e: FormEvent) => {
             console.log('modelConfigId: ' + modelConfigId + ' translateMode: ' + translateMode);
@@ -234,6 +236,14 @@ export default function Translate() {
                         headers: { 'Content-Type': 'application/json' },
                         onmessage(ev) {
                             setResults((r) => r + ev.data);
+                            if (!firstMessage) {
+                                firstMessage = true;
+                                //scroll the results area to the bottom
+                                const resultsPane = document.getElementById("resultsPane")!;
+                                if (window.innerWidth < 768) { // the tailwind md breakpoint
+                                    resultsPane.scrollIntoView({behavior: "smooth"});
+                                }
+                            }
                         }
                     });
                 } else { // special processing for llama 2 70B model for now
@@ -251,6 +261,14 @@ export default function Translate() {
                             break;
                         }
                         resultsText += decoder.decode(value);
+                        if (!firstMessage) {
+                            firstMessage = true;
+                            //scroll the results area to the bottom
+                            const resultsPane = document.getElementById("resultsPane")!;
+                            if (window.innerWidth < 768) { // the tailwind md breakpoint
+                                resultsPane.scrollIntoView({behavior: "smooth"});
+                            }
+                        }
                     }
                     setResults(resultsText);
                 }
@@ -269,6 +287,7 @@ export default function Translate() {
                 setInflight(false);
                 setSubmitBtnText("Translate");
                 setSubmitBtnEnabled(true);
+                firstMessage = false;
                 //    disableLanguageSelect(false);
             }
         },
@@ -281,7 +300,7 @@ export default function Translate() {
                 {/* Row for all of the controls and operations */}
                 <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">
                     {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
-                    <div className="translate-pane-left">
+                    <div id="inputPane" className="input-pane">
                         {/* Here is the control strip */}
                         <div className="control-strip">
                             {/* Here is the toggle switch to select the direction of translation. (English to Samoan or Samoan to English) */}
@@ -354,7 +373,7 @@ export default function Translate() {
                         </div>
                     </div>
                     {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
-                    <div className="translate-pane-right">
+                    <div id="resultsPane" className="results-pane">
                         {/* // Here is the control strip */}
                         <div className="control-strip">
                             <div className="grid grid-cols-3">

@@ -13,11 +13,11 @@
   @apply pt-0
 }
 
-.translate-pane-left {
+.input-pane {
   @apply w-full lg:w-1/2 h-full
 }
 
-.translate-pane-right {
+.results-pane {
   @apply w-full lg:w-1/2 h-full
 }
 
