@@ -48,6 +48,8 @@ export default function Translate() {
     const [submitBtnEnabled, setSubmitBtnEnabled] = useState(false);
     const [submitBtnText, setSubmitBtnText] = useState("Translate");
     const [results, setResults] = useState("Results will appear here.");
+    const [showResetButton, setShowResetButton] = useState(false);
+
     const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
 
     //useeffect to check the state of the voting variables and log them
@@ -163,6 +165,7 @@ export default function Translate() {
         setFeedbackEnabled(false);
         setSelectedVote(null);
         setClipboardBtnText("Copy to Clipboard");
+        setShowResetButton(false);
     };
 
     const handleClippy = (value: string) => {
@@ -170,6 +173,22 @@ export default function Translate() {
         //write a clipboard icon to the clipboard button text
         setClipboardBtnText("Copied. 📋");
     };
+
+    const handleReset = () => {
+        setResults("Results will appear here.");
+        setInputValue("");
+        //leaving the language selector and model selector alone. people probably want to use the same one. should we leave the input?
+        setTransactionId("");
+        setSubmitBtnEnabled(false);
+        setSubmitBtnVisible(false);
+        setFeedbackEnabled(false);
+        setSelectedVote(null);
+        setShowResetButton(false);
+        setClipboardBtnText("Copy to Clipboard");
+        if (window.scrollY > 0) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
 
     // const disableLanguageSelect = (disable: boolean) => {
     //     if (disable) {
@@ -219,6 +238,7 @@ export default function Translate() {
             setInflight(true);
             setSubmitBtnText("Processing..");
             setResults("");
+            setShowResetButton(false);
 
             // Handle inflght-ness
             setClipboardBtnText("Copy to Clipboard");
@@ -282,12 +302,17 @@ export default function Translate() {
                 setFeedbackEnabled(true);
             } catch (error) {
                 console.error(error);
+                const resultsPane = document.getElementById("resultsPane")!;
+                            if (window.innerWidth < 768) { // the tailwind md breakpoint
+                                resultsPane.scrollIntoView({behavior: "smooth"});
+                            }
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
                 setSubmitBtnText("Translate");
                 setSubmitBtnEnabled(true);
                 firstMessage = false;
+                setShowResetButton(true);
                 //    disableLanguageSelect(false);
             }
         },
@@ -428,6 +453,15 @@ export default function Translate() {
                         <div className="results-container">
                             <pre id="resultsTextArea" className="results-text-area">{results}</pre>
                         </div>
+                        {/* // Here is the reset button, visible only when there are results. */}
+                        <div className={`flex justify-end mt-5 ${!showResetButton ? 'hidden' : ''}`}>
+                            <button
+                                type="button"
+                                className="control-strip-item"
+                                id="btnReset"
+                                onClick={handleReset}
+                            > Reset </button>
+                            </div>
                     </div>
                 </div>
                 {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
