@@ -265,11 +265,9 @@ export default function Translate() {
     return (
         <Container className="mb-20">
             <form onSubmit={submitHandler}>
-
                 {/* Row for all of the controls and operations */}
                 <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">
                     {/* All right, we now start on the left side with a half-width column containing a control strip at the top and a text area below. */}
-
                     <div className="translate-pane-left">
                         {/* Here is the control strip */}
                         <div className="control-strip">
@@ -292,7 +290,6 @@ export default function Translate() {
                                         // defaultValue={translateOptions[0]}
                                         onChange={(e) => updateTranslateMode(e)}
                                     />
-
                                 </div>
                                 {/* // Here is the button to clear the text area. */}
                                 <div className="mt-2 lg:mt-0 flex justify-end col-span-1 gap-1">
@@ -310,8 +307,18 @@ export default function Translate() {
                         </div>
                         {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
                         <div className="relative text-input-container">
-                            <textarea id="textInputArea" className="text-input-area" placeholder="Enter text to be translated (up to 2000 characters) here."
-                                onChange={(e) => handleInputChange(e.target.value)}>
+                            <textarea 
+                            id="textInputArea" 
+                            className="text-input-area" 
+                            placeholder="Enter text to be translated (up to 2000 characters) here."
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) { // Check for "Enter" key press and also ensure "Shift" is not held down
+                                  e.preventDefault(); // Prevent the default "Enter" key action
+                                  submitHandler(e as unknown as FormEvent); // Manually trigger the form submission
+                                }
+                            }}
+                                onChange={(e) => handleInputChange(e.target.value)}
+                                >
                             </textarea>
                             <button
                                 className="absolute top-2 right-2 bg-transparent hover:bg-gray-200 p-2 rounded-md"
@@ -333,7 +340,6 @@ export default function Translate() {
                             </button>
                         </div>
                     </div>
-
                     {/* // Now we move to the right side with a half-width column containing a control strip at the top and the results pane below. */}
                     <div className="translate-pane-right">
                         {/* // Here is the control strip */}
@@ -351,7 +357,6 @@ export default function Translate() {
                                         <button
                                             className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'upvote') || (feedbackEnabled && selectedVote === 'downvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'upvote' ? 'bg-gray-200' : ''}`}
                                             disabled={(!feedbackEnabled && selectedVote === 'upvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
-
                                             id="btnUpvote"
                                             onClick={handleUpvote}
                                         >
@@ -364,12 +369,10 @@ export default function Translate() {
                                                     d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"
                                                 />                                            </svg>
                                         </button>
-
                                         {/* Downvote Button */}
                                         <button
                                             className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'downvote') || (feedbackEnabled && selectedVote === 'upvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'downvote' ? 'bg-gray-200' : ''}`}
                                             disabled={(!feedbackEnabled && selectedVote === 'downvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
-
                                             id="btnDownvote"
                                             onClick={handleDownvote}
                                         >
