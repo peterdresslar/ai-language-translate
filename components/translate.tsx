@@ -471,8 +471,8 @@ export default function Translate() {
                         <div className="row flex justify-center">
                             <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
                         </div>
-                        <div className="row md:flex md:items-center gap-10 justify-center">
-                            <div className="md:w-1/2">
+                        <div className="row md:flex md:items-center gap-10 justify-evenly">
+                            <div className="md:w-1/2 justify-center">
                                 {/* model selector dropdown with the two hardcoded options for now */}
                                 <Select
                                     theme={(theme) => ({
@@ -490,8 +490,8 @@ export default function Translate() {
                                     onChange={(e) => handleModelConfigChange(e)}
                                 />
                             </div>
-                            <div className="md:w-1/2">
-                                <pre className="text-sm">Application version 0.0.1</pre>
+                            <div className="pt-2 lg:pt-0 md:w-1/2 justify-center">
+                                <div className="text-sm flex justify-center font-mono">Application version 0.0.1</div>
                             </div>
                         </div>
                     </div>
