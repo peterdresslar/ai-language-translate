@@ -4,6 +4,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { FormEvent, useCallback, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
+import Feedback from "./feedback";
 
 export const runtime = 'edge';
 
@@ -31,6 +32,9 @@ export default function Translate() {
         { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
     ];
     const [translateMode, setTranslateMode] = useState("");
+
+    //feedback stuff including modal state
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [feedbackEnabled, setFeedbackEnabled] = useState(false);
     const [selectedVote, setSelectedVote] = useState<'upvote' | 'downvote' | null>(null);
 
@@ -46,10 +50,11 @@ export default function Translate() {
     const [results, setResults] = useState("Results will appear here.");
     const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
 
-    //useeffect to log states of submit button variables to the console
+    //useeffect to check the state of the voting variables and log them
     useEffect(() => {
-        console.log('submitBtnVisible: ' + submitBtnVisible + ' submitBtnEnabled: ' + submitBtnEnabled + ' submitBtnText: ' + submitBtnText);
-    }, [submitBtnVisible, submitBtnEnabled, submitBtnText]);
+        console.log('feedbackEnabled: ' + feedbackEnabled + ' selectedVote: ' + selectedVote);
+    }, [feedbackEnabled, selectedVote]);
+
 
     // Eventually should move this to a route  
     // returns the transactionId
@@ -80,12 +85,12 @@ export default function Translate() {
         }
     }
 
-    const updateTranslationWithFeedback = async (feedback: String, transactionId: String) => {
-        console.log("updating db with feedback " + feedback + " for transactionId " + transactionId);
+    const updateTranslationWithFeedback = async (feedbackVote: String, feedbackText: String, transactionId: String) => {
+        console.log("updating db with feedback " + feedbackVote + " and text " + feedbackText + " for transaction " + transactionId);
         try {
             let { data, error } = await dbClient
                 .from('translations')
-                .update({ feedback_state: feedback })
+                .update({ feedback_vote: feedbackVote, feedback_text: feedbackText })
                 .eq('transaction_id', transactionId)
             if (error) {
                 console.log("m " + error.message);
@@ -174,21 +179,29 @@ export default function Translate() {
     //     }
     // };
 
-    const handleUpvote = async () => {
-        //disable the feedback buttons
+    const handleUpvote = () => {
         setSelectedVote('upvote');
-        setFeedbackEnabled(false);
-        //update the translation record with the feedback
-        updateTranslationWithFeedback("upvote", transactionId);
+        setShowFeedbackModal(true);
     }
 
-
-    const handleDownvote = async () => {
-        //change the text of the feedback button
+    const handleDownvote = () => {
         setSelectedVote('downvote');
+        setShowFeedbackModal(true);
+    };
+
+    const handleCancel = () => {
+        setSelectedVote(null);
+        setShowFeedbackModal(false);
+        // Probably do nothing else?
+    }
+
+    const handleFeedbackSubmit = (feedback: string) => {
+        if (selectedVote && transactionId) {
+            updateTranslationWithFeedback(selectedVote, feedback, transactionId);
+        } 
+        // if not, we'll just squelch the feedback since something isn't right anyway.
+        setShowFeedbackModal(false);
         setFeedbackEnabled(false);
-        //update the translation record with the feedback
-        updateTranslationWithFeedback("downvote", transactionId);
     };
 
     const submitHandler = useCallback(
@@ -307,19 +320,19 @@ export default function Translate() {
                         </div>
                         {/* // Here is the text area with a placeholder communicating the maximum number of tokens (let's just say 2000 Characters) allowed. */}
                         <div className="relative text-input-container">
-                            <textarea 
-                            id="textInputArea" 
-                            value={inputValue}
-                            className="text-input-area" 
-                            placeholder="Enter text to be translated (up to 2000 characters) here."
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) { // Check for "Enter" key press and also ensure "Shift" is not held down
-                                  e.preventDefault(); // Prevent the default "Enter" key action
-                                  submitHandler(e as unknown as FormEvent); // Manually trigger the form submission
-                                }
-                            }}
+                            <textarea
+                                id="textInputArea"
+                                value={inputValue}
+                                className="text-input-area"
+                                placeholder="Enter text to be translated (up to 2000 characters) here."
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) { // Check for "Enter" key press and also ensure "Shift" is not held down
+                                        e.preventDefault(); // Prevent the default "Enter" key action
+                                        submitHandler(e as unknown as FormEvent); // Manually trigger the form submission
+                                    }
+                                }}
                                 onChange={(e) => handleInputChange(e.target.value)}
-                                />
+                            />
                             <button
                                 className="absolute top-2 right-2 bg-transparent hover:bg-gray-200 p-2 rounded-md"
                                 id="btnClear"
@@ -347,7 +360,7 @@ export default function Translate() {
                             <div className="grid grid-cols-3">
                                 {/* // Here is the button to copy the results pane to the clipboard. */}
                                 <div className="col-span-2 ">
-                                    <button className="control-strip-item" id="btnCopy"
+                                    <button type="button" className="control-strip-item" id="btnCopy"
                                         onClick={(e) => handleClippy(results)}>{clipboardBtnText}</button>
                                 </div>
                                 {/* // Here is the thumbs up button. */}
@@ -355,6 +368,7 @@ export default function Translate() {
                                     <div>
                                         {/* Upvote Button */}
                                         <button
+                                            type="button"
                                             className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'upvote') || (feedbackEnabled && selectedVote === 'downvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'upvote' ? 'bg-gray-200' : ''}`}
                                             disabled={(!feedbackEnabled && selectedVote === 'upvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
                                             id="btnUpvote"
@@ -371,6 +385,7 @@ export default function Translate() {
                                         </button>
                                         {/* Downvote Button */}
                                         <button
+                                            type="button"
                                             className={`vote-btn bg-transparent p-2 rounded-md hover:bg-gray-200 ${(!feedbackEnabled && selectedVote !== 'downvote') || (feedbackEnabled && selectedVote === 'upvote') ? 'hidden' : ''} ${!feedbackEnabled && selectedVote === 'downvote' ? 'bg-gray-200' : ''}`}
                                             disabled={(!feedbackEnabled && selectedVote === 'downvote') || (!feedbackEnabled && !selectedVote) ? true : undefined}
                                             id="btnDownvote"
@@ -429,6 +444,13 @@ export default function Translate() {
                     </div>
                 </div>
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
+                <Feedback
+                    show={showFeedbackModal}
+                    onClose={() => setShowFeedbackModal(false)}
+                    onSubmit={handleFeedbackSubmit}
+                    onCancel={handleCancel}
+                    feedbackVote={selectedVote!}
+                />
             </form>
         </Container>
     );
