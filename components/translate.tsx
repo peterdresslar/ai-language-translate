@@ -469,7 +469,7 @@ export default function Translate() {
                 <div className="technical-options flex justify-center mt-5">
                     <div className="grid grid-rows-2">
                         <div className="row flex justify-center">
-                            <h2 className="justify-center mb-5">Fa'amatalaga fa'apitoa <em>(Technical details)</em></h2>
+                            <h2 className="justify-center mt-5 md:mb-2 font-bold font-mono">Technical Details</h2>
                         </div>
                         <div className="row md:flex md:items-center gap-10 justify-evenly">
                             <div className="md:w-1/2 justify-center">

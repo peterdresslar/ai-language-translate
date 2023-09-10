@@ -54,7 +54,7 @@
 }
 
 .react-select-model {
-  @apply text-sm
+  @apply text-sm w-[200px]
 }
 
 .vote-btn:disabled {
