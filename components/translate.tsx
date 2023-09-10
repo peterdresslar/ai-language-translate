@@ -320,7 +320,7 @@ export default function Translate() {
     );
 
     return (
-        <Container className="mb-20">
+        <Container className="md:mb-20">
             <form onSubmit={submitHandler}>
                 {/* Row for all of the controls and operations */}
                 <div className="flex flex-wrap lg:flex-nowrap justify-center align-start gap-4 h-5/6">

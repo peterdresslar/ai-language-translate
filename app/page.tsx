@@ -11,20 +11,20 @@ const Home = () => {
   return (
     <>
       <Head>
-        <title>Beta AI-powered translator for Samoan and English.</title>
+        <title>Experimental AI Translator</title>
         <meta
           name="description"
-          content="Beta AI-powered translator for Samoan and English."
+          content="Experimental AI-powered translator for Samoan, Chamorro, and other Pacific Languages."
         />
         <link rel="icon" href="/img/PBDE.png" />
       </Head>
 
       <SectionTitle
         pretitle="BETA"
-        title="Translation Powered By AI: An Experiment.">
+        title="AI Language Translator">
       </SectionTitle>
       <Message
-        translated="This is a beta version of the translator, experimenting with AI-powered language processing."
+        translated="This is an experimental translator app powered by AI. Results may vary widely, but your feedback is very helpful!"
         moreMessage="Este i tinige' na traduksion lenguahi; risetia kumekeilek-na usa AI. Si Yu'us Ma'ase para i finatinas-mu."
         message="O le fa'aliliuga gagana fa'ata'ita'i lea; su'esu'e pe fa'afefea ona fa'aoga ma AI. Fa'afetai mo le taumafai.">
         </Message>
