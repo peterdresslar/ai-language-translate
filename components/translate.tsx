@@ -34,7 +34,7 @@ export default function Translate() {
     const [feedbackEnabled, setFeedbackEnabled] = useState(false);
     const [selectedVote, setSelectedVote] = useState<'upvote' | 'downvote' | null>(null);
 
-    const [input, setInput] = useState("");
+    const [inputValue, setInputValue] = useState("");
     const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
     const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx); //default to the first model in the list
     const [userId, setUserId] = useState(1); // later we can add users
@@ -61,7 +61,7 @@ export default function Translate() {
         try {
             let { data, error } = await dbClient
                 .from('translations')
-                .insert({ user_id: userId, model_config: modelConfigId, prompt: input, source_lang: sourceLang, target_lang: targetLang, response: resultsText })
+                .insert({ user_id: userId, model_config: modelConfigId, prompt: inputValue, source_lang: sourceLang, target_lang: targetLang, response: resultsText })
                 .select();
             if (error) {
                 console.log("m " + error.message);
@@ -120,7 +120,7 @@ export default function Translate() {
             console.log("updateTranslateMode called with " + option.value);
             setTranslateMode(option.value);
             // if the input is not empty, enable the submit button
-            if (input.length > 0) {
+            if (inputValue.length > 0) {
                 setSubmitBtnEnabled(true);
                 setSubmitBtnVisible(true);
                 setSubmitBtnText("Translate");
@@ -136,8 +136,9 @@ export default function Translate() {
     }
 
     const handleInputChange = (value: string) => {
-        setInput(value);
-        //enable btnSubmit if input is not empty and a language has been selected
+        setInputValue(value);  // Update inputValue to keep textarea in sync
+
+        // Dealing with enabling UI based on input
         if (value.length > 0 && translateMode.length > 0) {
             setSubmitBtnEnabled(true);
             setSubmitBtnVisible(true);
@@ -146,11 +147,10 @@ export default function Translate() {
             setSubmitBtnEnabled(false);
             setSubmitBtnVisible(false);
         }
-        //check if the btnSubmit is enabled
     };
 
     const handleClear = () => {
-        setInput("");
+        setInputValue("");
         setResults("Results will appear here.");
         setTransactionId("");
         setSubmitBtnEnabled(false);
@@ -217,7 +217,7 @@ export default function Translate() {
                     //determine which translateMode we are in by reading the radio button value
                     await fetchEventSource('/api/translate', {
                         method: 'POST',
-                        body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
+                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                         headers: { 'Content-Type': 'application/json' },
                         onmessage(ev) {
                             setResults((r) => r + ev.data);
@@ -226,7 +226,7 @@ export default function Translate() {
                 } else { // special processing for llama 2 70B model for now
                     const response = await fetch('/api/translate', {
                         method: 'POST',
-                        body: JSON.stringify({ translateMode: translateMode, input: input, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
+                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                         headers: { 'Content-Type': 'application/json' },
                     });
                     const reader = response.body!.getReader();
@@ -259,7 +259,7 @@ export default function Translate() {
                 //    disableLanguageSelect(false);
             }
         },
-        [input, inflight, modelConfigId, translateMode, feedbackEnabled, selectedVote, clipboardBtnText, results, transactionId, submitBtnText, submitBtnVisible] //ending the useCallback statement
+        [inputValue, inflight, modelConfigId, translateMode, feedbackEnabled, selectedVote, clipboardBtnText, results, transactionId, submitBtnText, submitBtnVisible] //ending the useCallback statement
     );
 
     return (
@@ -309,6 +309,7 @@ export default function Translate() {
                         <div className="relative text-input-container">
                             <textarea 
                             id="textInputArea" 
+                            value={inputValue}
                             className="text-input-area" 
                             placeholder="Enter text to be translated (up to 2000 characters) here."
                             onKeyDown={(e) => {
@@ -318,8 +319,7 @@ export default function Translate() {
                                 }
                             }}
                                 onChange={(e) => handleInputChange(e.target.value)}
-                                >
-                            </textarea>
+                                />
                             <button
                                 className="absolute top-2 right-2 bg-transparent hover:bg-gray-200 p-2 rounded-md"
                                 id="btnClear"
