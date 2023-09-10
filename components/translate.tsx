@@ -5,6 +5,7 @@ import { FormEvent, useCallback, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
 import Feedback from "./feedback";
+import { APP_VERSION } from "../config";
 
 export const runtime = 'edge';
 
@@ -29,7 +30,7 @@ export default function Translate() {
     const modelOptions: Option[] = [
         { idx: 0, value: 'gpt4', label: 'OpenAI GPT-4' },
         { idx: 1, value: 'gpt35', label: 'OpenAI GPT-3.5' },
-        { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (fa\'atamala/slow)' }
+        { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (can be slow!)' }
     ];
     const [translateMode, setTranslateMode] = useState("");
 
@@ -68,7 +69,7 @@ export default function Translate() {
         try {
             let { data, error } = await dbClient
                 .from('translations')
-                .insert({ user_id: userId, model_config: modelConfigId, prompt: inputValue, source_lang: sourceLang, target_lang: targetLang, response: resultsText })
+                .insert({ user_id: userId, model_config: modelConfigId, prompt: inputValue, source_lang: sourceLang, target_lang: targetLang, response: resultsText, app_version: APP_VERSION })
                 .select();
             if (error) {
                 console.log("m " + error.message);
@@ -491,7 +492,7 @@ export default function Translate() {
                                 />
                             </div>
                             <div className="pt-2 lg:pt-0 md:w-1/2 justify-center">
-                                <div className="text-sm flex justify-center font-mono">Application version 0.0.1</div>
+                                <div className="text-sm flex justify-center font-mono">Application version {APP_VERSION}</div>
                             </div>
                         </div>
                     </div>
