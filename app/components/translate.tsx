@@ -378,7 +378,10 @@ export default function Translate() {
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) { // Check for "Enter" key press and also ensure "Shift" is not held down
                                         e.preventDefault(); // Prevent the default "Enter" key action
-                                        submitHandler(e as unknown as FormEvent); // Manually trigger the form submission
+                                        // check if we have a language selected and text in the input area
+                                        if (translateMode.length > 0 && inputValue.length > 0) {
+                                            submitHandler(e as unknown as FormEvent); // Manually trigger the form submission
+                                        }
                                     }
                                 }}
                                 onChange={(e) => handleInputChange(e.target.value)}
