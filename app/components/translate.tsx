@@ -70,7 +70,7 @@ export default function Translate() {
         try {
             let { data, error } = await dbClient
                 .from('translations')
-                .insert({ user_id: userId, model_config: modelConfigId, prompt: inputValue, source_lang: sourceLang, target_lang: targetLang, response: resultsText, app_version: APP_VERSION })
+                .insert({ user_id: userId, model_config: modelConfigId, prompt: inputValue, source_lang: sourceLang, target_lang: targetLang, response: resultsText, app_version: APP_VERSION, is_development: process.env.NEXT_PUBLIC_IS_DEVELOPMENT })
                 .select();
             if (error) {
                 console.log("m " + error.message);
