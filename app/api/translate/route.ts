@@ -98,6 +98,10 @@ export async function POST(req: Request) {
         input: {
           prompt: input,
           system_prompt: systemPrompt,
+          max_new_tokens: requestedModelConfig.maxTokens,
+          temperature: requestedModelConfig.temperature,
+          top_p: 1,
+          repetition_penalty: 1
           // verbose: true
         },
         stream: true,
