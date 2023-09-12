@@ -256,7 +256,8 @@ export default function Translate() {
                         headers: { 'Content-Type': 'application/json' },
                         onmessage(ev) {
                             //this is a hack to deal with https://github.com/Azure/fetch-event-source/issues/50
-                            if (ev.data.length == 0) {
+                            //if message is empty and it is not the firstMessage
+                            if (ev.data.length == 0 && firstMessage) {
                                 setResults((r) => r + "\n");
                             } else {
                                 setResults((r) => r + ev.data);
