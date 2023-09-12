@@ -249,6 +249,7 @@ export default function Translate() {
 
             try {
                 console.log('streaming');
+                let lastEv= "xxx";
 
                 if (modelConfigId != 2) {
                     //determine which translateMode we are in by reading the radio button value
@@ -257,7 +258,15 @@ export default function Translate() {
                         body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
                         headers: { 'Content-Type': 'application/json' },
                         onmessage(ev) {
-                            setResults((r) => r + ev.data);
+                            //if we receive two empty values for ev in a row, assume it is a newline (and write a newline to the results)
+                            //we will need a temporary value to hold the previous value of ev
+                            //this is a hack to deal with https://github.com/Azure/fetch-event-source/issues/50
+                            if (ev.data.length == 0 && lastEv.length == 0) {
+                                setResults((r) => r + "\n");
+                            } else {
+                                setResults((r) => r + ev.data);
+                            }
+                            lastEv = ev.data;
                             if (!firstMessage) {
                                 firstMessage = true;
                                 //scroll the results area to the bottom
