@@ -9,29 +9,9 @@ import {
 import Replicate from 'replicate';
 import { ReplicateStream, StreamingTextResponse } from 'ai';
 
-
-import type { ModelConfig } from '../../ModelConfig';
+import { ModelConfig, getModelConfigById, modelConfigs } from '../../utils/modelConfig';
 
 export const runtime = 'edge';
-
-//I expect we will move these to different routes
-async function resolveModelConfig(modelConfigId: number) {
-  let c;
-  try {
-    if (modelConfigId == 1) {
-      c = '{"modelConfigId": 1, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    } else if (modelConfigId == 2) { // LLama/Replicate
-      c = '{"modelConfigId": 2, "configName": "LLama-Replicate default settings", "modelName": "Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    } else { // default to GPT-4
-      c = '{"modelConfigId": 0, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    }
-    const mC: ModelConfig = JSON.parse(c);
-    return mC;
-  } catch (error) {
-    console.log("error fetching modelConfig for modelConfigId ${modelConfigId}");
-    return undefined;
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -39,7 +19,7 @@ export async function POST(req: Request) {
     console.log('translateMode', translateMode);
     console.log('input', input);
     console.log('modelConfigId', modelConfigId);
-    const modelConfig = await resolveModelConfig(modelConfigId);
+    const modelConfig = getModelConfigById(modelConfigId);
     if (modelConfig === undefined) {
       //do something to handle this error
       console.log("modelConfig is undefined");
@@ -118,7 +98,7 @@ export async function POST(req: Request) {
         input: {
           prompt: input,
           system_prompt: systemPrompt,
-         // verbose: true
+          // verbose: true
         },
         stream: true,
       });

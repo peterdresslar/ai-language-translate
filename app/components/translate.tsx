@@ -5,7 +5,8 @@ import { FormEvent, useCallback, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
 import Feedback from "./feedback";
-import { APP_VERSION } from "../config";
+import { APP_VERSION } from "../../config"
+import { modelConfigData, languageOptionData } from "../lib/data";
 
 export const runtime = 'edge';
 
@@ -21,17 +22,17 @@ type Option = {
 }
 
 export default function Translate() {
-    const translateOptions: Option[] = [
-        { idx: 0, value: 'englishToSamoan', label: 'English to Samoan' },
-        { idx: 1, value: 'samoanToEnglish', label: 'Samoan to English' },
-        { idx: 2, value: 'englishToChamorro', label: 'English to Chamorro' },
-        { idx: 3, value: 'chamorroToEnglish', label: 'Chamorro to English' }
-    ];
-    const modelOptions: Option[] = [
-        { idx: 0, value: 'gpt4', label: 'OpenAI GPT-4' },
-        { idx: 1, value: 'gpt35', label: 'OpenAI GPT-3.5' },
-        { idx: 2, value: 'llama270', label: 'Meta Llama 2 70B (can be slow!)' }
-    ];
+    const modelOptions: Option[] = modelConfigData.map(({ modelConfigId, modelConfigName, modelConfigLabel }) => ({
+        idx: modelConfigId,
+        value: modelConfigName,
+        label: modelConfigLabel
+    }));
+
+    const languageOptions: Option[] = languageOptionData.map((data, idx) => ({
+        ...data,
+        idx
+    }));
+
     const [translateMode, setTranslateMode] = useState("");
 
     //feedback stuff including modal state
@@ -55,8 +56,8 @@ export default function Translate() {
 
     //useeffect to check the state of the voting variables and log them
     useEffect(() => {
-        console.log('feedbackEnabled: ' + feedbackEnabled + ' selectedVote: ' + selectedVote);
-    }, [feedbackEnabled, selectedVote]);
+        console.log('modelConfigId ' + modelConfigId );
+    }, [modelConfigId]);
 
 
     // Eventually should move this to a route  
@@ -189,7 +190,7 @@ export default function Translate() {
         if (window.scrollY > 0) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      };
+    };
 
     // const disableLanguageSelect = (disable: boolean) => {
     //     if (disable) {
@@ -218,7 +219,7 @@ export default function Translate() {
     const handleFeedbackSubmit = (feedback: string) => {
         if (selectedVote && transactionId) {
             updateTranslationWithFeedback(selectedVote, feedback, transactionId);
-        } 
+        }
         // if not, we'll just squelch the feedback since something isn't right anyway.
         setShowFeedbackModal(false);
         setFeedbackEnabled(false);
@@ -262,7 +263,7 @@ export default function Translate() {
                                 //scroll the results area to the bottom
                                 const resultsPane = document.getElementById("resultsPane")!;
                                 if (window.innerWidth < 768) { // the tailwind md breakpoint
-                                    resultsPane.scrollIntoView({behavior: "smooth"});
+                                    resultsPane.scrollIntoView({ behavior: "smooth" });
                                 }
                             }
                         }
@@ -287,7 +288,7 @@ export default function Translate() {
                             //scroll the results area to the bottom
                             const resultsPane = document.getElementById("resultsPane")!;
                             if (window.innerWidth < 768) { // the tailwind md breakpoint
-                                resultsPane.scrollIntoView({behavior: "smooth"});
+                                resultsPane.scrollIntoView({ behavior: "smooth" });
                             }
                         }
                     }
@@ -304,9 +305,9 @@ export default function Translate() {
             } catch (error) {
                 console.error(error);
                 const resultsPane = document.getElementById("resultsPane")!;
-                            if (window.innerWidth < 768) { // the tailwind md breakpoint
-                                resultsPane.scrollIntoView({behavior: "smooth"});
-                            }
+                if (window.innerWidth < 768) { // the tailwind md breakpoint
+                    resultsPane.scrollIntoView({ behavior: "smooth" });
+                }
                 setResults("An error has occurred. Please try again. Error: " + error + ".");
             } finally {
                 setInflight(false);
@@ -344,7 +345,7 @@ export default function Translate() {
                                         })}
                                         classNamePrefix="react-select-translate"
                                         placeholder="To start, select languages here..."
-                                        options={translateOptions}
+                                        options={languageOptions}
                                         // defaultValue={translateOptions[0]}
                                         onChange={(e) => updateTranslateMode(e)}
                                     />
@@ -462,7 +463,7 @@ export default function Translate() {
                                 id="btnReset"
                                 onClick={handleReset}
                             > Reset </button>
-                            </div>
+                        </div>
                     </div>
                 </div>
                 {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}

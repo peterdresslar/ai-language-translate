@@ -1,10 +1,10 @@
 'use client';
 import Head from "next/head";
-import SectionTitle from "../components/sectionTitle";
+import SectionTitle from "./components/sectionTitle";
 
-import Translate from "../components/translate";
-import Footer from "../components/footer";
-import Message from "../components/message";
+import Translate from "./components/translate";
+import Footer from "./components/footer";
+import Message from "./components/message";
 import { Suspense } from "react";
 
 const Home = () => {
