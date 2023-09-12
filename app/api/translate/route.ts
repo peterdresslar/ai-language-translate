@@ -9,29 +9,9 @@ import {
 import Replicate from 'replicate';
 import { ReplicateStream, StreamingTextResponse } from 'ai';
 
-
-import type { ModelConfig } from '../../ModelConfig';
+import { ModelConfig, getModelConfigById, modelConfigs } from '../../utils/modelConfig';
 
 export const runtime = 'edge';
-
-//I expect we will move these to different routes
-async function resolveModelConfig(modelConfigId: number) {
-  let c;
-  try {
-    if (modelConfigId == 1) {
-      c = '{"modelConfigId": 1, "configName": "GPT-3.5-turbo default settings", "modelName": "gpt-3.5-turbo", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    } else if (modelConfigId == 2) { // LLama/Replicate
-      c = '{"modelConfigId": 2, "configName": "LLama-Replicate default settings", "modelName": "Llama70b", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    } else { // default to GPT-4
-      c = '{"modelConfigId": 0, "configName": "GPT-4 default settings", "modelName": "gpt-4", "temperature": 0, "streaming": true, "maxTokens": 2000}';
-    }
-    const mC: ModelConfig = JSON.parse(c);
-    return mC;
-  } catch (error) {
-    console.log("error fetching modelConfig for modelConfigId ${modelConfigId}");
-    return undefined;
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -39,8 +19,8 @@ export async function POST(req: Request) {
     console.log('translateMode', translateMode);
     console.log('input', input);
     console.log('modelConfigId', modelConfigId);
-    const modelConfig = await resolveModelConfig(modelConfigId);
-    if (modelConfig === undefined) {
+    const requestedModelConfig = getModelConfigById(modelConfigId);
+    if (requestedModelConfig === undefined) {
       //do something to handle this error
       console.log("modelConfig is undefined");
       return new Response("", {
@@ -49,8 +29,8 @@ export async function POST(req: Request) {
         statusText: 'Sorry, something went wrong when trying to access that AI model. Please try another model. If you continue to have problems, please contact us.'
       });
       // else if one of the two OpenAI modelconfigs
-    } else if (modelConfig.modelName === 'gpt-4' || modelConfig.modelName === 'gpt-3.5-turbo') {
-      console.log("modelConfig is defined with name " + modelConfig.modelName);
+    } else if (requestedModelConfig.modelConfigId === 0 || requestedModelConfig.modelConfigId === 1) {
+      console.log("modelConfig is defined with name " + requestedModelConfig.modelName);
       // set input language and output language from our translateMode. translateMode can be one of four options: englishToSamoan, samoanToEnglish, chamorroToEnglish, englishToChamorro
       // can split the string on "To" and then use the first and second parts to set the input and output languages
       const inputLang = translateMode.split("To")[0];
@@ -70,9 +50,9 @@ export async function POST(req: Request) {
       const llm = new ChatOpenAI({
         openAIApiKey: process.env.OPENAI_API_KEY,
         streaming: true,
-        temperature: modelConfig.temperature,
-        modelName: modelConfig.modelName,
-        maxTokens: modelConfig.maxTokens,
+        temperature: requestedModelConfig.temperature,
+        modelName: requestedModelConfig.modelName,
+        maxTokens: requestedModelConfig.maxTokens,
         callbackManager: CallbackManager.fromHandlers({
           handleLLMNewToken: async (token: string) => {
             await writer.ready;
@@ -102,11 +82,11 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'text/event-stream' },
       });
 
-    } else if (modelConfig.modelName === 'Llama70b') { // Completely different path for Replicate for now. Using Vercel ai package since we couldn't get the handle on langchain/replicate
+    } else if (requestedModelConfig.modelConfigId === 2) { // Completely different path for Replicate for now. Using Vercel ai package since we couldn't get the handle on langchain/replicate
       const replicate = new Replicate({
         auth: process.env.REPLICATE_API_KEY || '',
       });
-      console.log("modelConfig is defined with name " + modelConfig.modelName);
+      console.log("modelConfig is defined with name " + requestedModelConfig.modelName);
       const inputLang = (translateMode === 'toSamoan') ? 'English' : 'Samoan';
       const outputLang = (translateMode === 'toSamoan') ? 'Samoan' : 'English';
       const systemPrompt = "You are a professional translator. You always translate " + inputLang + " to " + outputLang + ". Even if you are not comfortable with your Samoan or Chamorro language skills, you do your very best. Please only respond with the translated text. No commentary is requested or desired. Thank you.";
@@ -118,7 +98,7 @@ export async function POST(req: Request) {
         input: {
           prompt: input,
           system_prompt: systemPrompt,
-         // verbose: true
+          // verbose: true
         },
         stream: true,
       });
@@ -126,7 +106,7 @@ export async function POST(req: Request) {
       return new StreamingTextResponse(stream);
 
     } else { // this means we do not have a model. should not reach
-      console.log("Something went wrong. modelConfig.modelName is " + modelConfig.modelName);
+      console.log("Something went wrong. modelConfig.modelName is " + requestedModelConfig.modelName);
       return;
     }
 
