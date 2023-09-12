@@ -86,7 +86,7 @@ export async function POST(req: Request) {
         auth: process.env.REPLICATE_API_KEY || '',
       });
       console.log("modelConfig is defined with name " + requestedModelConfig.modelName);
-      const systemPrompt = "You always respond with the best translation from " + sourceLang + " to " + targetLang + " you can generate. If there is a mix of languages in the user prompt you do your best to translate it all to " + targetLang + ". You do not add commentary, but simply supply the best translation you can.";
+      const systemPrompt = "You always respond with the best translation from " + inputLang + " to " + outputLang + " you can generate. If there is a mix of languages in the user prompt you do your best to translate it all to " + outputLang + ". You do not add commentary, but simply supply the best translation you can.";
 
       // Ask Replicate for a streaming chat completion given the prompt
       const prediction = await replicate.predictions.create({
