@@ -1,7 +1,7 @@
 export const modelConfigData = [
-    { modelConfigId: 0, modelConfigName: 'gpt4', modelConfigLabel: 'OpenAI GPT-4', modelName: 'gpt4', temperature: 0.9, streaming: false, maxTokens: 256 },
-    { modelConfigId: 1, modelConfigName: 'gpt35', modelConfigLabel: 'OpenAI GPT-3.5', modelName: 'gpt35', temperature: 0.9, streaming: false, maxTokens: 256 },
-    { modelConfigId: 2, modelConfigName: 'llama270', modelConfigLabel: 'Meta Llama 2 70B (can be slow!)', modelName: 'llama270', temperature: 0.9, streaming: false, maxTokens: 256 }
+    { modelConfigId: 0, modelConfigName: 'gpt4', modelConfigLabel: 'OpenAI GPT-4', modelName: 'gpt-4', temperature: 0.9, streaming: false, maxTokens: 256 },
+    { modelConfigId: 1, modelConfigName: 'gpt35', modelConfigLabel: 'OpenAI GPT-3.5', modelName: 'gpt-3.5-turbo', temperature: 0.9, streaming: false, maxTokens: 256 },
+    { modelConfigId: 2, modelConfigName: 'llama270', modelConfigLabel: 'Meta Llama 2 70B (can be slow!)', modelName: 'Llama70b', temperature: 0.9, streaming: false, maxTokens: 256 }
 ];
 
 export const languageOptionData = [
