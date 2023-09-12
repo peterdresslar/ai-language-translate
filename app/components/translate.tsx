@@ -474,7 +474,7 @@ export default function Translate() {
                             <h2 className="justify-center mt-5 md:mb-2 font-bold font-mono">Technical Details</h2>
                         </div>
                         <div className="row md:flex md:items-center gap-10 justify-evenly">
-                            <div className="md:w-1/2 justify-center">
+                            <div className="model-select justify-center">
                                 {/* model selector dropdown with the two hardcoded options for now */}
                                 <Select
                                     theme={(theme) => ({
