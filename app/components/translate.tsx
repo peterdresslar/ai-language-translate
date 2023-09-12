@@ -453,7 +453,7 @@ export default function Translate() {
                         </div>
                         {/* // Here is the results pane. It's a div with a preformatted text area inside. It will scroll if the text is too long. */}
                         <div className="results-container">
-                            <pre id="resultsTextArea" className="results-text-area">{results}</pre>
+                            <pre id="resultsTextArea" className="results-text-area whitespace-pre-wrap">{results}</pre>
                         </div>
                         {/* // Here is the reset button, visible only when there are results. */}
                         <div className={`flex justify-end mt-5 ${!showResetButton ? 'hidden' : ''}`}>
