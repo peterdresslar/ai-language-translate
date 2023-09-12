@@ -53,8 +53,8 @@
   @apply text-gray-900 dark:text-gray-900
 }
 
-.react-select-model {
-  @apply text-sm w-[200px]
+.model-select {
+  @apply text-sm w-[300px]
 }
 
 .vote-btn:disabled {
