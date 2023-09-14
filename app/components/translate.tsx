@@ -56,7 +56,7 @@ export default function Translate() {
 
     //useeffect to check the state of the voting variables and log them
     useEffect(() => {
-        console.log('modelConfigId ' + modelConfigId );
+        console.log('modelConfigId ' + modelConfigId);
     }, [modelConfigId]);
 
 
@@ -353,6 +353,14 @@ export default function Translate() {
                                         // defaultValue={translateOptions[0]}
                                         onChange={(e) => updateTranslateMode(e)}
                                     />
+                                    <div className="align-center">
+                                        {/* <label className="font-mono text-sm pt-1 ml-4" htmlFor="rdTranslationType">Translation Type</label> */}
+                                        <div className="space-x-2 ml-2 mt-2" id="rdTranslationType">
+                                            <input type="radio" name="translation" value="formal" defaultChecked /> Formal
+                                            <input type="radio" name="translation" value="business" /> Business
+                                            <input type="radio" name="translation" value="casual" /> Casual
+                                        </div>
+                                    </div>
                                 </div>
                                 {/* // Here is the button to clear the text area. */}
                                 <div className="mt-2 lg:mt-0 flex justify-end col-span-1 gap-1">
@@ -473,37 +481,46 @@ export default function Translate() {
                         </div>
                     </div>
                 </div>
-                {/* We have a hideable technical options section in a new row next, which is a collapsed div with an unhide-button */}
+                {/* Here is the tech section */}
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
-                <div className="technical-options flex justify-center mt-5">
-                    <div className="grid grid-rows-2">
-                        <div className="row flex justify-center">
-                            <h2 className="justify-center mt-5 md:mb-2 font-bold font-mono">Technical Details</h2>
+                <div className="flex flex-wrap mt-5 justify-center">
+                    {/* Header gets a row of its own */}
+                    <div className="flex justify-center w-full">
+                        <h2 className="font-bold font-mono">Technical Details</h2>
+                    </div>
+                    <div className="pt-2 lg:pt-0">
+                        <div className="text-sm flex justify-center font-mono">Application version {APP_VERSION}</div>
+                    </div>
+
+                    <div className="flex flex-col items-center md:flex-row pt-2 md:pt-4 md:gap-10 flex-wrap w-full justify-center mt-2">
+                        <div className="model-select w-full flex-shrink-0 mb-2 items-center md:items-start justify-center sm:mb-0">
+                            {/* model selector dropdown with the two hardcoded options for now */}
+                            <label className="font-mono text-center ml-3" htmlFor="selModel">AI Model</label>
+                            <Select
+                                id="selModel"
+                                theme={(theme) => ({
+                                    ...theme,
+                                    borderRadius: 0,
+                                    colors: {
+                                        ...theme.colors,
+                                        primary25: '#93c5fd',
+                                        primary: '#3b82f6',
+                                    },
+                                })}
+                                classNamePrefix="react-select-model"
+                                options={modelOptions}
+                                defaultValue={modelOptions[0]}
+                                onChange={(e) => handleModelConfigChange(e)}
+                            />
                         </div>
-                        <div className="row md:flex md:items-center gap-10 justify-evenly">
-                            <div className="model-select justify-center">
-                                {/* model selector dropdown with the two hardcoded options for now */}
-                                <Select
-                                    theme={(theme) => ({
-                                        ...theme,
-                                        borderRadius: 0,
-                                        colors: {
-                                            ...theme.colors,
-                                            primary25: '#93c5fd',
-                                            primary: '#3b82f6',
-                                        },
-                                    })}
-                                    classNamePrefix="react-select-model"
-                                    options={modelOptions}
-                                    defaultValue={modelOptions[0]}
-                                    onChange={(e) => handleModelConfigChange(e)}
-                                />
-                            </div>
-                            <div className="pt-2 lg:pt-0 md:w-1/2 justify-center">
-                                <div className="text-sm flex justify-center font-mono">Application version {APP_VERSION}</div>
-                            </div>
+                        <div className="flex-shrink-0">
+                            <label className="font-mono text-sm">
+                                <input type="checkbox" name="explain" defaultChecked={false} />
+                                <span className="ml-2">Explain</span>
+                            </label>
                         </div>
                     </div>
+
                 </div>
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
                 <Feedback
