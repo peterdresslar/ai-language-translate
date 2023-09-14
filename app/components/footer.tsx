@@ -40,7 +40,7 @@ export default function Footer() {
 
       </div> {/* end of the main footernav */}
 
-      <div className="flex my-2 font-bold justify-center text-gray-600 dark:text-gray-400">
+      <div className="flex my-4 font-bold justify-center text-gray-600 dark:text-gray-400">
         <a
           href="https://www.pacificbroadband.org/disclaimer/"
           target="_blank"
@@ -49,14 +49,14 @@ export default function Footer() {
         </a>{" "}
       </div>
 
-      <div className="flex mb-10 text-sm justify-center text-gray-600 dark:text-gray-400">
-        Copyright © {new Date().getFullYear()}. Peter Dresslar,&nbsp;
-        <a
+      <div className="flex flex-col mb-10 text-sm items-center justify-center text-gray-600 dark:text-gray-400">
+        <p>Copyright © {new Date().getFullYear()}, Peter Dresslar,</p>
+        <p><a
           href="https://pacificbroadband.org/"
           target="_blank"
           rel="noopener">
           Pacific Broadband and Digital Equity.
-        </a>{" "}
+        </a></p>
       </div>
     </Container>
   );
