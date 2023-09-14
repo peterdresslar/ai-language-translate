@@ -18,6 +18,7 @@ module.exports = {
     fontFamily: {
       sans: ["Inter", ...defaultTheme.fontFamily.sans],
       stock: [defaultTheme.fontFamily.sans],
+      mono: [defaultTheme.fontFamily.mono],
     },
   },
   variants: {
@@ -27,5 +28,8 @@ module.exports = {
       textColor: ["disabled", "hover"],
     },
   },
-  plugins: [require("@tailwindcss/aspect-ratio")],
+  plugins: [
+    require("@tailwindcss/aspect-ratio"),
+    // require("@tailwindcss/forms"),
+  ],
 };

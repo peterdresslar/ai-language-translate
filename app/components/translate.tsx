@@ -33,31 +33,35 @@ export default function Translate() {
         idx
     }));
 
+    //user input state management
     const [translateMode, setTranslateMode] = useState("");
-
-    //feedback stuff including modal state
-    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-    const [feedbackEnabled, setFeedbackEnabled] = useState(false);
     const [selectedVote, setSelectedVote] = useState<'upvote' | 'downvote' | null>(null);
-
     const [inputValue, setInputValue] = useState("");
-    const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
     const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx); //default to the first model in the list
-    const [userId, setUserId] = useState(1); // later we can add users
+    const [translateFlavor, setTranslateFlavor] = useState("formal"); //default to formal
+    const [translateExplain, setTranslateExplain] = useState(false); //default to false
 
+    // UI state management
     const [inflight, setInflight] = useState(false);
+    const [clipboardBtnText, setClipboardBtnText] = useState("Copy to Clipboard");
     const [submitBtnVisible, setSubmitBtnVisible] = useState(false);
     const [submitBtnEnabled, setSubmitBtnEnabled] = useState(false);
     const [submitBtnText, setSubmitBtnText] = useState("Translate");
-    const [results, setResults] = useState("Results will appear here.");
     const [showResetButton, setShowResetButton] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [feedbackEnabled, setFeedbackEnabled] = useState(false);
 
+    // outputs -n- stuff
+    const [results, setResults] = useState("Results will appear here.");
     const [transactionId, setTransactionId] = useState(""); //this id for translation will be used to assign the feedback to the correct translation record
+
+    // not ready
+    const [userId, setUserId] = useState(1); // later we can add users
 
     //useeffect to check the state of the voting variables and log them
     useEffect(() => {
-        console.log('modelConfigId ' + modelConfigId);
-    }, [modelConfigId]);
+        console.log('translateFlavor ' + translateFlavor + ' translateExplain ' + translateExplain);
+    }, [translateFlavor, translateExplain]);
 
 
     // Eventually should move this to a route  
@@ -275,7 +279,7 @@ export default function Translate() {
                 } else { // special processing for llama 2 70B model for now
                     const response = await fetch('/api/translate', {
                         method: 'POST',
-                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
+                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId, translateFlavor: translateFlavor, translateExplain: translateExplain }), //modelConfig is hard-coded for now
                         headers: { 'Content-Type': 'application/json' },
                     });
                     const reader = response.body!.getReader();
@@ -354,11 +358,32 @@ export default function Translate() {
                                         onChange={(e) => updateTranslateMode(e)}
                                     />
                                     <div className="align-center">
-                                        {/* <label className="font-mono text-sm pt-1 ml-4" htmlFor="rdTranslationType">Translation Type</label> */}
-                                        <div className="space-x-2 ml-2 mt-2" id="rdTranslationType">
-                                            <input type="radio" name="translation" value="formal" defaultChecked /> Formal
-                                            <input type="radio" name="translation" value="business" /> Business
-                                            <input type="radio" name="translation" value="casual" /> Casual
+                                        {/* <label className="font-mono text-sm pt-1 ml-4" htmlFor="rdTranslateFlavor">Translation Type</label> */}
+                                        <div className="mt-2" id="rdTranslateFlavor">
+                                            <input
+                                                type="radio"
+                                                name="translation"
+                                                value="formal"
+                                                checked={translateFlavor === 'formal'}
+                                                onChange={(e) => setTranslateFlavor(e.target.value)}
+                                            />
+                                            <span className="ml-1 mr-4">Formal</span>
+                                            <input
+                                                type="radio"
+                                                name="translation"
+                                                value="business"
+                                                checked={translateFlavor === 'business'}
+                                                onChange={(e) => setTranslateFlavor(e.target.value)}
+                                            />
+                                            <span className="ml-1 mr-4">Business</span>
+                                            <input
+                                                type="radio"
+                                                name="translation"
+                                                value="casual"
+                                                checked={translateFlavor === 'casual'}
+                                                onChange={(e) => setTranslateFlavor(e.target.value)}
+                                            />
+                                            <span className="ml-1 mr-4">Casual</span>
                                         </div>
                                     </div>
                                 </div>
@@ -486,16 +511,16 @@ export default function Translate() {
                 <div className="flex flex-wrap mt-5 justify-center">
                     {/* Header gets a row of its own */}
                     <div className="flex justify-center w-full">
-                        <h2 className="font-bold font-mono">Technical Details</h2>
+                        <h2 className="font-bold">Technical Details</h2>
                     </div>
                     <div className="pt-2 lg:pt-0">
-                        <div className="text-sm flex justify-center font-mono">Application version {APP_VERSION}</div>
+                        <div className="text-sm flex justify-center">Application version {APP_VERSION}</div>
                     </div>
 
                     <div className="flex flex-col items-center md:flex-row pt-2 md:pt-4 md:gap-10 flex-wrap w-full justify-center mt-2">
                         <div className="model-select w-full flex-shrink-0 mb-2 items-center md:items-start justify-center sm:mb-0">
                             {/* model selector dropdown with the two hardcoded options for now */}
-                            <label className="font-mono text-center ml-3" htmlFor="selModel">AI Model</label>
+                            <label className="text-center ml-3" htmlFor="selModel">AI Model</label>
                             <Select
                                 id="selModel"
                                 theme={(theme) => ({
@@ -514,13 +539,17 @@ export default function Translate() {
                             />
                         </div>
                         <div className="flex-shrink-0">
-                            <label className="font-mono text-sm">
-                                <input type="checkbox" name="explain" defaultChecked={false} />
+                            <label className="text-sm">
+                                <input 
+                                type="checkbox" 
+                                name="explain" 
+                                checked={translateExplain}
+                                onChange={(e) => setTranslateExplain(e.target.checked)}
+                                />
                                 <span className="ml-2">Explain</span>
                             </label>
                         </div>
                     </div>
-
                 </div>
                 <hr className="mt-10 border-sky-700 dark:border-gray-100"></hr>
                 <Feedback
