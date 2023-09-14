@@ -11,6 +11,8 @@ export const languageOptionData = [
     { value: 'chamorroToEnglish', label: 'Chamorro to English' }
 ];
 
+export type TranslateFlavor = 'formal' | 'business' | 'casual';
+
 // label is the language ISO-639-1 code, unless the language doesn't have one, then it's the ISO-639-2 code.
 // if the language doesn't have the ISO-639-2 code, then it's the English name of the language.
 export const languageKeys = [

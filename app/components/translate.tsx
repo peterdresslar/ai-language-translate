@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
 import Feedback from "./feedback";
 import { APP_VERSION } from "../../config"
-import { modelConfigData, languageOptionData } from "../lib/data";
+import { modelConfigData, languageOptionData, TranslateFlavor } from "../lib/data";
 
 export const runtime = 'edge';
 
@@ -38,7 +38,7 @@ export default function Translate() {
     const [selectedVote, setSelectedVote] = useState<'upvote' | 'downvote' | null>(null);
     const [inputValue, setInputValue] = useState("");
     const [modelConfigId, setModelConfigId] = useState(modelOptions[0].idx); //default to the first model in the list
-    const [translateFlavor, setTranslateFlavor] = useState("formal"); //default to formal
+    const [translateFlavor, setTranslateFlavor] = useState<TranslateFlavor>('formal');
     const [translateExplain, setTranslateExplain] = useState(false); //default to false
 
     // UI state management
@@ -365,15 +365,15 @@ export default function Translate() {
                                                 name="translation"
                                                 value="formal"
                                                 checked={translateFlavor === 'formal'}
-                                                onChange={(e) => setTranslateFlavor(e.target.value)}
-                                            />
+                                                onChange={() => setTranslateFlavor('formal')}
+                                                />
                                             <span className="ml-1 mr-4">Formal</span>
                                             <input
                                                 type="radio"
                                                 name="translation"
                                                 value="business"
                                                 checked={translateFlavor === 'business'}
-                                                onChange={(e) => setTranslateFlavor(e.target.value)}
+                                                onChange={() => setTranslateFlavor('business')}
                                             />
                                             <span className="ml-1 mr-4">Business</span>
                                             <input
@@ -381,7 +381,7 @@ export default function Translate() {
                                                 name="translation"
                                                 value="casual"
                                                 checked={translateFlavor === 'casual'}
-                                                onChange={(e) => setTranslateFlavor(e.target.value)}
+                                                onChange={() => setTranslateFlavor('casual')}
                                             />
                                             <span className="ml-1 mr-4">Casual</span>
                                         </div>
