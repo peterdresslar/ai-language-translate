@@ -1,4 +1,4 @@
-# nextjs-langchain-supabase-translate
+# ai-language-translate
 
 [Online](https://nextjs-langchain-supabase-translate.vercel.app/)
 
