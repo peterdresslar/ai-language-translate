@@ -334,7 +334,7 @@ export default function Translate() {
                 //    disableLanguageSelect(false);
             }
         },
-        [inputValue, inflight, modelConfigId, translateMode, feedbackEnabled, selectedVote, clipboardBtnText, results, transactionId, submitBtnText, submitBtnVisible] //ending the useCallback statement
+        [inputValue, inflight, modelConfigId, translateMode, feedbackEnabled, selectedVote, clipboardBtnText, results, transactionId, submitBtnText, submitBtnVisible, translateExplain, translateFlavor] //ending the useCallback statement
     );
 
     return (

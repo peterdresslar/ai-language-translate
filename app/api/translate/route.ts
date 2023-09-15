@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         // OpenAI provider, which should return a stream
       } else if (modelConfigId === 2) {
         //type our stream as a ReplicateStream
-        stream = await replicateProvider(modelConfigId, inputLang, outputLang, input, inputOpts);
+        stream = await replicateProvider(modelConfigId, input, inputLang, outputLang, inputOpts);
       } else if (modelConfigId === 3) {
         // Claude provider, which should return a stream
       } else {
