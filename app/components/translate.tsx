@@ -6,7 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
 import Feedback from "./feedback";
 import { APP_VERSION } from "../../config"
-import { modelConfigData, languageOptionData, TranslateFlavor } from "../lib/data";
+import { modelConfigData, languageOptionData } from "../lib/data";
+import { TranslateFlavor } from "@/lib/InputOpts";
 
 export const runtime = 'edge';
 

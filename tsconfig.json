@@ -17,6 +17,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "baseUrl": ".",
+    // paths including app/lib
+    "paths": {
+      "@/lib/*": ["app/lib/*"],
+    },
     "plugins": [
       {
         "name": "next"
