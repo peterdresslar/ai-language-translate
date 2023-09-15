@@ -238,6 +238,8 @@ export default function Translate() {
             e.preventDefault();
             console.log('in event');
 
+
+
             // Prevent multiple submissions.
             if (inflight) return;
 
@@ -278,9 +280,14 @@ export default function Translate() {
                         }
                     });
                 } else { // special processing for llama 2 70B model for now
+                    // Serialize inputOpts so we can send with our POST
+                    const inputOpts = {
+                        translateFlavor: translateFlavor,
+                        translateExplain: translateExplain
+                    };
                     const response = await fetch('/api/translate', {
                         method: 'POST',
-                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId, translateFlavor: translateFlavor, translateExplain: translateExplain }), //modelConfig is hard-coded for now
+                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId, inputOpts: inputOpts }), //modelConfig is hard-coded for now
                         headers: { 'Content-Type': 'application/json' },
                     });
                     const reader = response.body!.getReader();
@@ -367,7 +374,7 @@ export default function Translate() {
                                                 value="formal"
                                                 checked={translateFlavor === 'formal'}
                                                 onChange={() => setTranslateFlavor('formal')}
-                                                />
+                                            />
                                             <span className="ml-1 mr-4">Formal</span>
                                             <input
                                                 type="radio"
@@ -541,11 +548,11 @@ export default function Translate() {
                         </div>
                         <div className="flex-shrink-0">
                             <label className="text-sm">
-                                <input 
-                                type="checkbox" 
-                                name="explain" 
-                                checked={translateExplain}
-                                onChange={(e) => setTranslateExplain(e.target.checked)}
+                                <input
+                                    type="checkbox"
+                                    name="explain"
+                                    checked={translateExplain}
+                                    onChange={(e) => setTranslateExplain(e.target.checked)}
                                 />
                                 <span className="ml-2">Explain</span>
                             </label>

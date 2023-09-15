@@ -9,7 +9,7 @@ import getSystemPromptStub from '../helpers/systemPrompts'
 
 export const runtime = 'edge';
 
-export default async function handleReplicateTranslation(
+export default async function replicateProvider(
     cartridgeId: number,
     input: string,
     inputLang: string,
@@ -20,7 +20,6 @@ export default async function handleReplicateTranslation(
     const replicate = new Replicate({
         auth: process.env.REPLICATE_API_KEY || '',
     });
-
 
     const cartridge = cartridges.find((c: Cartridge) => c.id === cartridgeId);
     if (!cartridge) {
@@ -55,7 +54,6 @@ export default async function handleReplicateTranslation(
             stream: true,
         });
         const stream = await ReplicateStream(prediction);
-        return new StreamingTextResponse(stream);
+        return stream;
     }
-
 }
