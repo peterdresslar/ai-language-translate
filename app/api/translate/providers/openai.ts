@@ -40,7 +40,7 @@ export default async function openaiProvider(
 
             // Ask OpenAI for a streaming chat completion given the prompt
             const response = await openai.chat.completions.create({
-                model: providerOpts.modelId as string, // will break if null
+                model: providerOpts.modelName as string, // will break if null
                 messages: [{ role: 'user', content: input }, { role: 'system', content: sysContent }],
                 stream: true,
                 temperature: providerOpts.temperature as number, // will break if null
