@@ -42,13 +42,13 @@ export default async function openaiProvider(
             const response = await openai.chat.completions.create({
                 model: providerOpts.modelId as string, // will break if null
                 messages: [{ role: 'user', content: input }, { role: 'system', content: sysContent }],
-                stream: providerOpts.stream as boolean, // will break if null
-                max_tokens: providerOpts.maxTokens as number, // will break if null
+                stream: true,
                 temperature: providerOpts.temperature as number, // will break if null
+                max_tokens: providerOpts.maxTokens as number, // will break if null
                 frequency_penalty: providerOpts.frequencyPenalty as number, // will break if null
             });
             const stream = OpenAIStream(response);
-            return new StreamingTextResponse(stream);
+            return stream;
         }
     }
 }
