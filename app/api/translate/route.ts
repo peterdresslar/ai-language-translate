@@ -1,4 +1,7 @@
+import anthropicProvider from './providers/anthropic';
+import openaiProvider from './providers/openai';
 import replicateProvider from './providers/replicate';
+
 import { StreamingTextResponse } from 'ai';
 
 export const runtime = 'edge';
@@ -23,12 +26,14 @@ export async function POST(req: Request) {
       
       // conditions should be based on cartridge.provider. Providers would be identified by a string, e.g. 'replicate', 'openai', 'anthropic'
       if (modelConfigId === 0 || modelConfigId === 1) {
-        // OpenAI provider, which should return a stream
+        // OpenAI provider, which should return a stream'
+        stream = await openaiProvider(modelConfigId, input, inputLang, outputLang, inputOpts);
       } else if (modelConfigId === 2) {
         //type our stream as a ReplicateStream
         stream = await replicateProvider(modelConfigId, input, inputLang, outputLang, inputOpts);
       } else if (modelConfigId === 3) {
         // Claude provider, which should return a stream
+        stream = await anthropicProvider(modelConfigId, input, inputLang, outputLang, inputOpts);
       } else {
         // Handle error
       }

@@ -1,4 +1,4 @@
-interface ProviderOpts {
+export interface ProviderOpts {
     [key: string]: number | string | boolean;
 }
 

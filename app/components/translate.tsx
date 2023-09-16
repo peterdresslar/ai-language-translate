@@ -1,6 +1,5 @@
 'use client';
 import Container from "./container";
-import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { FormEvent, useCallback, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Select from "react-select";
@@ -255,31 +254,8 @@ export default function Translate() {
             //    disableLanguageSelect(true);
 
             try {
-                if (modelConfigId != 2) {
-                    //determine which translateMode we are in by reading the radio button value
-                    await fetchEventSource('/api/translate', {
-                        method: 'POST',
-                        body: JSON.stringify({ translateMode: translateMode, input: inputValue, modelConfigId: modelConfigId }), //modelConfig is hard-coded for now
-                        headers: { 'Content-Type': 'application/json' },
-                        onmessage(ev) {
-                            //this is a hack to deal with https://github.com/Azure/fetch-event-source/issues/50
-                            //if message is empty and it is not the firstMessage
-                            if (ev.data.length == 0 && firstMessage) {
-                                setResults((r) => r + "\n");
-                            } else {
-                                setResults((r) => r + ev.data);
-                            }
-                            if (!firstMessage) {
-                                firstMessage = true;
-                                //scroll the results area to the bottom
-                                const resultsPane = document.getElementById("resultsPane")!;
-                                if (window.innerWidth < 768) { // the tailwind md breakpoint
-                                    resultsPane.scrollIntoView({ behavior: "smooth" });
-                                }
-                            }
-                        }
-                    });
-                } else { // special processing for llama 2 70B model for now
+                let r = "";
+            
                     // Serialize inputOpts so we can send with our POST
                     const inputOpts = {
                         translateFlavor: translateFlavor,
@@ -292,13 +268,12 @@ export default function Translate() {
                     });
                     const reader = response.body!.getReader();
                     const decoder = new TextDecoder();
-                    let resultsText = "";
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) {
                             break;
                         }
-                        resultsText += decoder.decode(value);
+                        r += decoder.decode(value);
                         if (!firstMessage) {
                             firstMessage = true;
                             //scroll the results area to the bottom
@@ -308,8 +283,8 @@ export default function Translate() {
                             }
                         }
                     }
-                    setResults(resultsText);
-                }
+                    setResults(r);
+                
                 // get the inner text of the resultsTextArea and write it to the database.
                 //note that there should be a better stateful way to do this.
                 const resultsText = document.getElementById("resultsTextArea")!.innerText;

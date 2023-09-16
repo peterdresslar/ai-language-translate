@@ -14,7 +14,7 @@ export const cartridges: Cartridge[] = [
             streaming: true,
             maxTokens: 2056,
             topP: 1.0,
-            repetitionPenalty: 1.0
+            repetitionPenalty: -2.0
         }
     },
     { // gpt-3.5-turbo
@@ -30,7 +30,7 @@ export const cartridges: Cartridge[] = [
             streaming: true,
             maxTokens: 2056,
             topP: 1.0,
-            repetitionPenalty: 1.0
+            frequencyPenalty: -2.0
         }
     },
     { // Llama-70b
@@ -70,7 +70,8 @@ export const cartridges: Cartridge[] = [
 export const modelConfigData = [
     { modelConfigId: 0, modelConfigName: 'gpt4', modelConfigLabel: 'OpenAI GPT-4', modelName: 'gpt-4', temperature: 0.1, streaming: false, maxTokens: 2056 },
     { modelConfigId: 1, modelConfigName: 'gpt35', modelConfigLabel: 'OpenAI GPT-3.5', modelName: 'gpt-3.5-turbo', temperature: 0.1, streaming: false, maxTokens: 2056 },
-    { modelConfigId: 2, modelConfigName: 'llama270', modelConfigLabel: 'Meta Llama 2 70B (can be slow!)', modelName: 'Llama70b', temperature: 0.01, streaming: false, maxTokens: 1028 }
+    { modelConfigId: 2, modelConfigName: 'llama270', modelConfigLabel: 'Meta Llama 2 70B (can be slow!)', modelName: 'Llama70b', temperature: 0.01, streaming: false, maxTokens: 1028 },
+    { modelConfigId: 3, modelConfigName: 'claude', modelConfigLabel: 'Claude', modelName: 'claude-v1', temperature: 0.01, streaming: false, maxTokens: 1028 }
 ];
 
 export const languageOptionData = [
