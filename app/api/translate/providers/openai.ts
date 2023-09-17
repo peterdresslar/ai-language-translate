@@ -5,7 +5,7 @@ import { OpenAIStream, StreamingTextResponse } from 'ai';
 import { cartridges } from "@/lib/data"
 import { Cartridge, ProviderOpts } from "@/lib/Cartridge";
 import { InputOpts } from '@/lib/InputOpts';
-import getSystemPromptStub from '../helpers/systemPrompts'
+import { getSystemPromptStub } from '../helpers/systemPrompts'
 
 export const runtime = 'edge';
 

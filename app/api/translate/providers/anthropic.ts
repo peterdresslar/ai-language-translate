@@ -5,8 +5,7 @@ import { AnthropicStream, StreamingTextResponse } from 'ai';
 import { cartridges } from "@/lib/data"
 import { Cartridge } from "@/lib/Cartridge";
 import { InputOpts } from '@/lib/InputOpts';
-import getSystemPromptStub from '../helpers/systemPrompts'
-import build from 'next/dist/build';
+import { getClaudePromptStub } from '../helpers/systemPrompts'
 
 export const runtime = 'edge';
 
@@ -38,8 +37,8 @@ export default async function anthropicProvider(
             // Note we are not yet constructing systemPrompt with more detail.
             // This will eventually be a function of the cartridge and the user's settings.
             // e.g., const systemPrompt = await getSystemPrompt(cartridge, translateFlavor, isExplain);
-            const systemPrompt = getSystemPromptStub(inputLang, outputLang, translateFlavor, translateExplain);
-            const preparedPrompt = `\n\nHuman: ${input}\n\nAssistant:${systemPrompt}\n\n`;
+            const claudePrompt = getClaudePromptStub(inputLang, outputLang, translateFlavor, translateExplain);
+            const preparedPrompt = `\n\nHuman: ${claudePrompt}: ${input}\n\nAssistant: `
 
             console.log("prompt is " + preparedPrompt);
 
