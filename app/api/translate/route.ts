@@ -36,6 +36,8 @@ export async function POST(req: Request) {
         stream = await anthropicProvider(modelConfigId, input, inputLang, outputLang, inputOpts);
       } else {
         // Handle error
+        // Ideally all the providers will have a common response mode on failure, and we would unify that here
+        // Basically we need let stream turn into a StreamingTextResponse on success or a Response on failure
       }
 
       // Create HTTP Response with the stream, if it exists
