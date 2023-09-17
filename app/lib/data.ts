@@ -57,10 +57,11 @@ export const cartridges: Cartridge[] = [
         sysPrompt: 'not yet implemented',
         cartridgeStatus: 'active',
         providerOpts: {
-            modelName: 'claude-v1',
-            max_tokens_to_sample: 1028,
+            version: '2023-06-01',
+            modelName: 'claude-2',
+            maxTokens: 1028,
             temperature: 0.01,
-            stream: true,
+            stream: true
         }
     }   
 ];

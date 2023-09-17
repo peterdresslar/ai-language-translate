@@ -26,6 +26,7 @@ export default async function anthropicProvider(
         throw new Error('Cartridge not found');
     } else {
         const providerOpts = cartridge.providerOpts;
+        console.log("providerOpts: " + JSON.stringify(providerOpts));
 
         if (inputOpts === null) {
             // Handle error
@@ -44,6 +45,15 @@ export default async function anthropicProvider(
                 throw new Error('Sorry, API Key not found or not working.');
             } 
             // Ask Anthropic for an API response
+            console.log(providerOpts.modelName);
+        console.log(JSON.stringify({
+            prompt: preparedPrompt,
+                    model: providerOpts.modelName, // will break if null
+                    max_tokens_to_sample: providerOpts.temperature, // will break if null
+                    temperature: providerOpts.temperature,
+                    stream: providerOpts.stream,
+        }));
+
             const response = await fetch('https://api.anthropic.com/v1/complete', { //nice if this were parameterized
                 method: 'POST',
                 headers: {
@@ -53,15 +63,17 @@ export default async function anthropicProvider(
                 },
                 body: JSON.stringify({
                     prompt: preparedPrompt,
-                    model: 'claude-2',
-                    max_tokens_to_sample: 1028,
-                    temperature: 0.01,
-                    stream: true,
+                    model: providerOpts.modelName, // will break if null
+                    max_tokens_to_sample: providerOpts.maxTokens, // will break if null
+                    temperature: providerOpts.temperature,
+                    stream: providerOpts.stream,
                 }),
             });
 
             // Check for errors
             if (!response.ok) {
+                console.log(response.statusText); 
+                console.log(response.status);
                 throw new Error('Sorry, something went wrong with the API call.');
             }
             const stream = AnthropicStream(response);
