@@ -43,6 +43,13 @@ export async function POST(req: Request) {
       // Create HTTP Response with the stream, if it exists
       if (stream) {
         return new StreamingTextResponse(stream);
+      } else {
+        // Handle error
+        return new Response("", {
+          headers: { 'Content-Type': 'application/json' },
+          status: 400,
+          statusText: 'Sorry, something went wrong with the model provider.'
+        });
       }
     }
   } catch (e) {
