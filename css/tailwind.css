@@ -54,7 +54,7 @@
 }
 
 .model-select {
-  @apply text-sm w-[300px]
+  @apply w-[300px] text-sm text-gray-900 dark:text-gray-900
 }
 
 .vote-btn:disabled {
