@@ -5,8 +5,12 @@
 @layer base {
   html,
   body {
-    @apply bg-sky-100 dark:bg-trueGray-900 
+    @apply antialiased bg-sky-100 dark:bg-trueGray-900 
   }
+}
+
+.content-wrapper {
+  @apply my-0 bg-sky-100 dark:bg-trueGray-900 
 }
 
 .message {

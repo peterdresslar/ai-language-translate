@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import Head from "next/head";
 import SectionTitle from "./components/sectionTitle";
 
@@ -18,22 +18,23 @@ const Home = () => {
         />
         <link rel="icon" href="/img/PBDE.png" />
       </Head>
-
-      <SectionTitle
-        pretitle="BETA"
-        title="AI Language Translator">
-      </SectionTitle>
-      <Message
-        translated="This is an experimental translator app powered by AI. Results may vary widely, but your feedback is very helpful!"
-        moreMessage="Este i tinige' na traduksion lenguahi; risetia kumekeilek-na usa AI. Si Yu'us Ma'ase para i finatinas-mu."
-        message="O le fa'aliliuga gagana fa'ata'ita'i lea; su'esu'e pe fa'afefea ona fa'aoga ma AI. Fa'afetai mo le taumafai.">
-        </Message>
+      <div className="content-wrapper my-0">
+        <SectionTitle
+          pretitle="BETA"
+          title="AI Language Translator"
+        ></SectionTitle>
+        <Message
+          translated="This is an experimental translator app powered by AI. Results may vary widely, but your feedback is very helpful!"
+          moreMessage="Este i tinige' na traduksion lenguahi; risetia kumekeilek-na usa AI. Si Yu'us Ma'ase para i finatinas-mu."
+          message="O le fa'aliliuga gagana fa'ata'ita'i lea; su'esu'e pe fa'afefea ona fa'aoga ma AI. Fa'afetai mo le taumafai."
+        ></Message>
         <Suspense fallback="Loading...">
-      <Translate />
-      </Suspense>
-      <Footer />
+          <Translate />
+        </Suspense>
+        <Footer />
+      </div>
     </>
   );
-}
+};
 
 export default Home;
