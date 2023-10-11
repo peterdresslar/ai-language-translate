@@ -56,7 +56,7 @@ export default async function replicateProvider(
                 },
                 stream: true,
             });
-            const stream = await ReplicateStream(prediction);
+            const stream = await ReplicateStream(prediction as any);
             return stream;
         }
     }
